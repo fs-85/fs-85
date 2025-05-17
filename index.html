@@ -41,6 +41,15 @@
     margin-top: 0.5px;  /* 距離表單一點間隔，可選 */
     font-weight: bold; /* 字體加粗，可選 */
     }
+    .footer-note {
+    color: #888;            /* 灰色字 */
+    font-size: 1em;         /* 一般字級，可再小一點改成 0.95em */
+    text-align: center;     /* 置中 */
+    margin-top: 32px;       /* 和上方分開一段距離 */
+    margin-bottom: 10px;    /* 下方預留空間 */
+    letter-spacing: 1.5px;  /* 字距微微拉開，更易讀 */
+}
+
   </style>
 </head>
 <body>
@@ -129,5 +138,6 @@ document.getElementById('myForm').addEventListener('submit', function(e){
 印表機：${printers.join(',')}`;
 });
 </script>
+  <div class="footer-note">此表單僅供本分署同仁填寫</div>
 </body>
 </html>
