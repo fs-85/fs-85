@@ -131,7 +131,7 @@ document.getElementById('myForm').addEventListener('submit', function(e){
 
   let data = { name, unit, title, printers };
 
-  fetch(apiBase, {
+  fetch('https://script.google.com/macros/s/AKfycbwtUOtWGLlQgltq1X15drN-s5FMp1_T6il21i_WPVsa7OWA7Nd0RMH6x3qF5oH05cnm/exec', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
