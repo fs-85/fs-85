@@ -36,20 +36,19 @@
       h2 { font-size: 1.3em; }
     }
     #msg {
-    color: #c00;       /* 紅色 */
-    text-align: center;/* 置中 */
-    margin-top: 0.5px;  /* 距離表單一點間隔，可選 */
-    font-weight: bold; /* 字體加粗，可選 */
+      color: #c00;       /* 紅色 */
+      text-align: center;/* 置中 */
+      margin-top: 0.5px;  /* 距離表單一點間隔，可選 */
+      font-weight: bold; /* 字體加粗，可選 */
     }
     .footer-note {
-    color: #888;            /* 灰色字 */
-    font-size: 1em;         /* 一般字級，可再小一點改成 0.95em */
-    text-align: center;     /* 置中 */
-    margin-top: 32px;       /* 和上方分開一段距離 */
-    margin-bottom: 10px;    /* 下方預留空間 */
-    letter-spacing: 1.5px;  /* 字距微微拉開，更易讀 */
-}
-
+      color: #888;
+      font-size: 1em;
+      text-align: center;
+      margin-top: 32px;
+      margin-bottom: 10px;
+      letter-spacing: 1.5px;
+    }
   </style>
 </head>
 <body>
@@ -93,18 +92,32 @@
   </form>
   <div id="msg"></div>
 <script>
-// 請把這個網址改成你的 users.json GitHub raw 連結
+// 1. 讀取 users.json
 const jsonUrl = 'https://raw.githubusercontent.com/fs-85/ss/refs/heads/main/users.json';
-
 let users = [];
 fetch(jsonUrl)
   .then(res => res.json())
   .then(data => { users = data; });
 
+// 2. 姓名輸入完畢時自動帶出單位與職稱
+document.getElementById('nameInput').addEventListener('blur', function() {
+  const name = this.value.trim();
+  const user = users.find(u => u.name === name);
+  if (user) {
+    document.getElementById('unitInput').value = user.unit;
+    document.getElementById('titleInput').value = user.title;
+  } else {
+    document.getElementById('unitInput').value = '';
+    document.getElementById('titleInput').value = '';
+  }
+});
+
+// 3. 表單送出
 document.getElementById('myForm').addEventListener('submit', function(e){
   e.preventDefault();
   if(!document.getElementById('unitInput').value || !document.getElementById('titleInput').value){
     document.getElementById('msg').innerText = '請輸入正確姓名，才能自動帶出單位和職稱';
+    document.getElementById('msg').style.color = '#c00';
     return;
   }
   let name = document.getElementById('nameInput').value.trim();
@@ -112,19 +125,16 @@ document.getElementById('myForm').addEventListener('submit', function(e){
   let title = document.getElementById('titleInput').value.trim();
   let printers = Array.from(document.querySelectorAll('input[name="printer"]:checked')).map(cb=>cb.value);
 
-  // 將資料組成物件
   let data = { name, unit, title, printers };
 
-  // 發送 POST 請求到 Apps Script Web API
   fetch('https://script.google.com/macros/s/AKfycbzC6ndobzzrUhDFhzjlxAVgoYYSeKi6BWqSTU2zmsTysvlMI5ZuZYLFzUSdFm6a7KIG/exec', {
     method: 'POST',
-    mode: 'no-cors', // Google API 可直接用 no-cors
+    mode: 'no-cors',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(data)
   }).then(res => {
-    // 不管回應內容如何，都顯示已送出
     document.getElementById('msg').innerText = '回報成功！資料已送出';
     document.getElementById('msg').style.color = '#27ae60';
     document.getElementById('myForm').reset();
@@ -134,7 +144,7 @@ document.getElementById('myForm').addEventListener('submit', function(e){
   });
 });
 
-// 限制印表機最多只能選2台
+// 4. 限制印表機最多只能選2台
 const checkboxes = document.querySelectorAll('input[name="printer"]');
 checkboxes.forEach(cb => cb.addEventListener('change', function() {
   let checked = document.querySelectorAll('input[name="printer"]:checked');
@@ -143,21 +153,6 @@ checkboxes.forEach(cb => cb.addEventListener('change', function() {
     alert('最多只能選2台印表機');
   }
 }));
-
-// 表單送出僅顯示資料（可再串接 Google Sheets 等）
-document.getElementById('myForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  if(!document.getElementById('unitInput').value || !document.getElementById('titleInput').value){
-    document.getElementById('msg').innerText = '請輸入正確姓名，才能自動帶出單位和職稱。';
-    return;
-  }
-  let printers = Array.from(document.querySelectorAll('input[name="printer"]:checked')).map(cb=>cb.value);
-  document.getElementById('msg').innerText = 
-    `姓名：${document.getElementById('nameInput').value}
-單位：${document.getElementById('unitInput').value}
-職稱：${document.getElementById('titleInput').value}
-印表機：${printers.join(',')}`;
-});
 </script>
   <div class="footer-note">此表單僅供本分署同仁填寫</div>
 </body>
