@@ -162,6 +162,9 @@ function checkDeadline() {
   if (now > deadline) {
     // 隱藏表單
     document.getElementById('myForm').style.display = 'none';
+    document.getElementById('pageTitle').style.display = 'none';
+    document.getElementById('pageDesc').style.display = 'none';
+    document.getElementById('footerNote').style.display = 'none';
     // 顯示截止訊息
     document.getElementById('deadlineMsg').innerHTML = `
       <div style="color:#c00; font-size:1.4em; text-align:center; margin-top:40px;">
@@ -172,6 +175,9 @@ function checkDeadline() {
   } else {
     // 表單還開放時，確保訊息消失
     document.getElementById('myForm').style.display = '';
+    document.getElementById('pageTitle').style.display = '';
+    document.getElementById('pageDesc').style.display = '';
+    document.getElementById('footerNote').style.display = '';
     document.getElementById('deadlineMsg').innerHTML = '';
   }
 }
