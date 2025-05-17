@@ -93,10 +93,9 @@
   <div id="deadlineMsg"></div>
   <div class="footer-note" id="footerNote">此表單僅供本分署同仁填寫</div>
 <script>
-const apiBase = 'https://script.google.com/macros/s/AKfycbzny8n1gFqlhjOtJzOrvUORr99yXfvKmWH9_NfXw-tUlHQ-kbNUJZytjbYyySnkBlKq/exec'; // ←請換成你自己部署的網址
-const deadline = new Date('2025-05-18T17:00:00+08:00'); // 截止時間
+const apiBase = 'https://script.google.com/macros/s/AKfycbzny8n1gFqlhjOtJzOrvUORr99yXfvKmWH9_NfXw-tUlHQ-kbNUJZytjbYyySnkBlKq/exec';
+const deadline = new Date('2025-05-21T17:00:00+08:00');
 
-// 1. 姓名輸入完畢時自動帶出單位與職稱（GET）
 document.getElementById('nameInput').addEventListener('blur', function() {
   const name = this.value.trim();
   if (!name) {
@@ -116,7 +115,6 @@ document.getElementById('nameInput').addEventListener('blur', function() {
     });
 });
 
-// 2. 表單送出（POST）
 document.getElementById('myForm').addEventListener('submit', function(e){
   e.preventDefault();
   if(!document.getElementById('unitInput').value || !document.getElementById('titleInput').value){
@@ -151,7 +149,6 @@ document.getElementById('myForm').addEventListener('submit', function(e){
     });
 });
 
-// 3. 限制印表機最多只能選2台
 const checkboxes = document.querySelectorAll('input[name="printer"]');
 checkboxes.forEach(cb => cb.addEventListener('change', function() {
   let checked = document.querySelectorAll('input[name="printer"]:checked');
@@ -161,7 +158,6 @@ checkboxes.forEach(cb => cb.addEventListener('change', function() {
   }
 }));
 
-// 4. 表單截止時間與內容隱藏
 function checkDeadline() {
   const now = new Date();
   if (now > deadline) {
