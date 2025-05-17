@@ -93,7 +93,7 @@
   <div id="deadlineMsg"></div>
   <div class="footer-note" id="footerNote">此表單僅供本分署同仁填寫</div>
 <script>
-const apiBase = 'https://script.google.com/macros/s/AKfycbwtUOtWGLlQgltq1X15drN-s5FMp1_T6il21i_WPVsa7OWA7Nd0RMH6x3qF5oH05cnm/exec'; // ←請換成你自己部署的網址
+const apiBase = 'https://script.google.com/macros/s/AKfycbzny8n1gFqlhjOtJzOrvUORr99yXfvKmWH9_NfXw-tUlHQ-kbNUJZytjbYyySnkBlKq/exec'; // ←請換成你自己部署的網址
 const deadline = new Date('2025-05-18T17:00:00+08:00'); // 截止時間
 
 // 1. 姓名輸入完畢時自動帶出單位與職稱（GET）
@@ -104,7 +104,7 @@ document.getElementById('nameInput').addEventListener('blur', function() {
     document.getElementById('titleInput').value = '';
     return;
   }
-  fetch(apiBase + '?name=' + encodeURIComponent(name))
+  fetch('https://script.google.com/macros/s/AKfycbzny8n1gFqlhjOtJzOrvUORr99yXfvKmWH9_NfXw-tUlHQ-kbNUJZytjbYyySnkBlKq/exec?action=query&name=' + encodeURIComponent(name))
     .then(res => res.json())
     .then(data => {
       document.getElementById('unitInput').value = data.unit || '';
@@ -129,36 +129,26 @@ document.getElementById('myForm').addEventListener('submit', function(e){
   let title = document.getElementById('titleInput').value.trim();
   let printers = Array.from(document.querySelectorAll('input[name="printer"]:checked')).map(cb=>cb.value);
 
-  let data = { name, unit, title, printers };
-
-  console.log('準備送出資料:', data);
-
-  fetch('https://script.google.com/macros/s/AKfycbwtUOtWGLlQgltq1X15drN-s5FMp1_T6il21i_WPVsa7OWA7Nd0RMH6x3qF5oH05cnm/exec', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  })
-  .then(res => {
-    console.log('fetch 回應:', res);
-    return res.json();
-  })
-  .then(result => {
-    console.log('fetch 解析結果:', result);
-    if(result.status === 'success') {
-      window.location.replace("success.html");
-    } else {
-      window.location.replace("fail.html");
-    }
-  })
-  .catch(err => {
-    // ===== 這裡就是你要加的！ =====
-    debugger; // Chrome 會暫停程式在這裡，你就能看到錯誤訊息
-    alert('fetch錯誤: ' + err); // 再加 alert 讓你看訊息
-    console.error('fetch 錯誤:', err);
-    window.location.replace("fail.html");
+  let params = new URLSearchParams({
+    action: "submit",
+    name,
+    unit,
+    title,
+    printers: printers.join(',')
   });
+
+  fetch('https://script.google.com/macros/s/AKfycbzny8n1gFqlhjOtJzOrvUORr99yXfvKmWH9_NfXw-tUlHQ-kbNUJZytjbYyySnkBlKq/exec?' + params.toString())
+    .then(res => res.json())
+    .then(result => {
+      if(result.status === 'success') {
+        window.location.replace("success.html");
+      } else {
+        window.location.replace("fail.html");
+      }
+    })
+    .catch(() => {
+      window.location.replace("fail.html");
+    });
 });
 
 // 3. 限制印表機最多只能選2台
