@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>表單範例（手機友善）</title>
+  <title>表單範例（input/button欄位內縮）</title>
   <style>
     body { 
       font-family: sans-serif; 
       max-width: 400px; 
       margin: 40px auto; 
-      padding: 10px;
+      padding: 10px 0 20px 0; /* 上、右、下、左 */
+      background: #fafaff;
     }
     label { 
       display: block; 
@@ -21,6 +22,9 @@
       font-size: 1.1em;
       margin-top: 4px;
       margin-bottom: 8px;
+      padding-left: 12px;
+      padding-right: 12px;
+      /* 這兩行讓欄位內容左右不靠邊 */
     }
     input[type="text"]:read-only { 
       background: #eee; 
@@ -30,7 +34,7 @@
       body {
         max-width: 98%;
         margin: 10px auto;
-        padding: 4px;
+        padding: 6px 0 12px 0;
       }
       h2 { font-size: 1.3em; }
     }
@@ -70,7 +74,7 @@
   </form>
   <div id="msg"></div>
 <script>
-// 這裡填入你的 GitHub JSON 原始網址
+// 請把這個網址改成你的 users.json GitHub raw 連結
 const jsonUrl = 'https://raw.githubusercontent.com/fs-85/ss/refs/heads/main/users.json';
 
 let users = [];
@@ -90,7 +94,7 @@ document.getElementById('nameInput').addEventListener('blur', function() {
   }
 });
 
-// 限制最多選2台印表機
+// 限制印表機最多只能選2台
 const checkboxes = document.querySelectorAll('input[name="printer"]');
 checkboxes.forEach(cb => cb.addEventListener('change', function() {
   let checked = document.querySelectorAll('input[name="printer"]:checked');
@@ -100,6 +104,7 @@ checkboxes.forEach(cb => cb.addEventListener('change', function() {
   }
 }));
 
+// 表單送出僅顯示資料（可再串接 Google Sheets 等）
 document.getElementById('myForm').addEventListener('submit', function(e){
   e.preventDefault();
   if(!document.getElementById('unitInput').value || !document.getElementById('titleInput').value){
