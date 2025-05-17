@@ -95,13 +95,13 @@
   <div class="footer-note" id="footerNote">此表單僅供本分署同仁填寫</div>
 <script>
 // 1. 讀取 users.json
-const jsonUrl = 'https://raw.githubusercontent.com/fs-85/ss/refs/heads/main/users.json';
+//const jsonUrl = 'https://raw.githubusercontent.com/fs-85/ss/refs/heads/main/users.json';
 // *** 設定你的截止時間！台灣時區 2025/5/18 17:00 ***
 const deadline = new Date('2025-05-18T03:40:00+08:00');
-let users = [];
-fetch(jsonUrl)
-  .then(res => res.json())
-  .then(data => { users = data; });
+//let users = [];
+//fetch(jsonUrl)
+//  .then(res => res.json())
+//  .then(data => { users = data; });
 
 // 2. 姓名輸入完畢時自動帶出單位與職稱
 document.getElementById('nameInput').addEventListener('blur', function() {
@@ -141,17 +141,22 @@ document.getElementById('myForm').addEventListener('submit', function(e){
 
   fetch('https://script.google.com/macros/s/AKfycbzC6ndobzzrUhDFhzjlxAVgoYYSeKi6BWqSTU2zmsTysvlMI5ZuZYLFzUSdFm6a7KIG/exec', {
     method: 'POST',
-    mode: 'no-cors',
     headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  }).then(res => {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(data)
+})
+.then(res => res.json())
+.then(result => {
+  if(result.status === 'success') {
     window.location.replace("success.html");
-    })
-    .catch(err => {
+  } else {
     window.location.replace("fail.html");
-    });
+  }
+})
+.catch(() => {
+  window.location.replace("fail.html");
+});
 });
 
 // 4. 限制印表機最多只能選2台
