@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>表單範例（input/button欄位內縮）</title>
+  <title>表單範例（手機不貼邊版）</title>
   <style>
     body { 
       font-family: sans-serif; 
       max-width: 400px; 
       margin: 40px auto; 
-      padding: 10px 0 20px 0; /* 上、右、下、左 */
+      padding: 10px 16px 20px 16px; /* 這裡的16px是左右空間關鍵 */
       background: #fafaff;
     }
     label { 
@@ -22,9 +22,7 @@
       font-size: 1.1em;
       margin-top: 4px;
       margin-bottom: 8px;
-      padding-left: 12px;
-      padding-right: 12px;
-      /* 這兩行讓欄位內容左右不靠邊 */
+      /* padding-left/right 可留可不留，已經有外層padding就夠 */
     }
     input[type="text"]:read-only { 
       background: #eee; 
@@ -34,7 +32,7 @@
       body {
         max-width: 98%;
         margin: 10px auto;
-        padding: 6px 0 12px 0;
+        padding: 6px 8px 12px 8px; /* 手機時左右再縮小一點padding */
       }
       h2 { font-size: 1.3em; }
     }
