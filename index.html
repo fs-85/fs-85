@@ -36,10 +36,10 @@
       h2 { font-size: 1.3em; }
     }
     #msg {
-      color: #c00;       /* 紅色 */
-      text-align: center;/* 置中 */
-      margin-top: 0.5px;  /* 距離表單一點間隔，可選 */
-      font-weight: bold; /* 字體加粗，可選 */
+      color: #c00;
+      text-align: center;
+      margin-top: 0.5px;
+      font-weight: bold;
     }
     .footer-note {
       color: #888;
@@ -52,9 +52,9 @@
   </style>
 </head>
 <body>
-  <!-- 新增標題與說明 -->
-  <h1 style="font-size:1.9em;margin-bottom:8px;">統計本分署執行科同仁印表機配置狀態</h1>
-  <div style="color:#555; font-size:1em; margin-bottom:20px; line-height:1.6;">
+  <!-- 1. 標題與說明加 id，方便 JS 控制隱藏 -->
+  <h1 id="pageTitle" style="font-size:1.9em;margin-bottom:8px;">統計本分署執行科同仁印表機配置狀態</h1>
+  <div id="pageDesc" style="color:#555; font-size:1em; margin-bottom:20px; line-height:1.6;">
     <b>請確實填寫您的姓名</b>，系統將自動帶入股別與職稱。<br>
     <span style="color:#c00;">※印表機最多只能勾選兩台</span>，請依實際配置狀態勾選。<br>
     如有問題請聯絡<b>資訊工程師#216</b>，謝謝。
@@ -92,10 +92,12 @@
   </form>
   <div id="msg"></div>
   <div id="deadlineMsg"></div>
+  <div class="footer-note" id="footerNote">此表單僅供本分署同仁填寫</div>
 <script>
 // 1. 讀取 users.json
 const jsonUrl = 'https://raw.githubusercontent.com/fs-85/ss/refs/heads/main/users.json';
-const deadline = new Date('2025-05-18T02:57:00+08:00');
+// *** 設定你的截止時間！台灣時區 2025/5/18 17:00 ***
+const deadline = new Date('2025-05-18T03:07:00+08:00');
 let users = [];
 fetch(jsonUrl)
   .then(res => res.json())
@@ -154,13 +156,11 @@ checkboxes.forEach(cb => cb.addEventListener('change', function() {
   }
 }));
 
-// 5.表單截止時間
+// 5. 表單截止時間與內容隱藏
 function checkDeadline() {
-  // 取得目前時間（台灣時間）
   const now = new Date();
-  // 若超過截止
   if (now > deadline) {
-    // 隱藏表單
+    // 隱藏表單、標題、內文、footer
     document.getElementById('myForm').style.display = 'none';
     document.getElementById('pageTitle').style.display = 'none';
     document.getElementById('pageDesc').style.display = 'none';
@@ -173,7 +173,7 @@ function checkDeadline() {
       </div>
     `;
   } else {
-    // 表單還開放時，確保訊息消失
+    // 表單還開放時，確保都顯示
     document.getElementById('myForm').style.display = '';
     document.getElementById('pageTitle').style.display = '';
     document.getElementById('pageDesc').style.display = '';
@@ -181,10 +181,8 @@ function checkDeadline() {
     document.getElementById('deadlineMsg').innerHTML = '';
   }
 }
-
 // 初次載入檢查一次
 checkDeadline();
 </script>
-  <div class="footer-note">此表單僅供本分署同仁填寫</div>
 </body>
 </html>
