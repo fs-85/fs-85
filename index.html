@@ -135,13 +135,11 @@ document.getElementById('myForm').addEventListener('submit', function(e){
     },
     body: JSON.stringify(data)
   }).then(res => {
-    document.getElementById('msg').innerText = '回報成功！資料已送出';
-    document.getElementById('msg').style.color = '#27ae60';
-    document.getElementById('myForm').reset();
-  }).catch(err => {
-    document.getElementById('msg').innerText = '送出失敗，請稍後再試！';
-    document.getElementById('msg').style.color = '#c00';
-  });
+    window.location.href = "success.html";
+    })
+    .catch(err => {
+    window.location.href = "fail.html";
+    });
 });
 
 // 4. 限制印表機最多只能選2台
