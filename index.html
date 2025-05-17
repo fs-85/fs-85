@@ -9,7 +9,7 @@
       font-family: sans-serif; 
       max-width: 400px; 
       margin: 40px auto; 
-      padding: 10px 20px 10px 20px; /* 這裡的16px是左右空間關鍵 */
+      padding: 10px 20px 10px 20px;
       background: #fafaff;
     }
     label { 
@@ -22,7 +22,6 @@
       font-size: 1.1em;
       margin-top: 4px;
       margin-bottom: 8px;
-      /* padding-left/right 可留可不留，已經有外層padding就夠 */
     }
     input[type="text"]:read-only { 
       background: #eee; 
@@ -32,13 +31,21 @@
       body {
         max-width: 98%;
         margin: 10px auto;
-        padding: 6px 16px 12px 16px; /* 手機時左右再縮小一點padding */
+        padding: 6px 16px 12px 16px;
       }
       h2 { font-size: 1.3em; }
     }
   </style>
 </head>
 <body>
+  <!-- 新增標題與說明 -->
+  <h1 style="margin-bottom:8px;">統計本分署執行科同仁印表機配置編號</h1>
+  <div style="color:#555; font-size:1em; margin-bottom:20px; line-height:1.6;">
+    請依序填寫以下資料，<b>姓名請填寫真實全名</b>。<br>
+    系統會自動帶入您的單位與職稱。<br>
+    <span style="color:#c00;">※印表機最多只能勾選兩台</span>，請依實際使用需求選擇。<br>
+    如有問題請聯絡資訊室。
+  </div>
   <h2>表單填寫</h2>
   <form id="myForm">
     <label>
