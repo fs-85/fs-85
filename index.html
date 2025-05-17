@@ -97,7 +97,7 @@
 // 1. 讀取 users.json
 const jsonUrl = 'https://raw.githubusercontent.com/fs-85/ss/refs/heads/main/users.json';
 // *** 設定你的截止時間！台灣時區 2025/5/18 17:00 ***
-const deadline = new Date('2025-05-18T03:07:00+08:00');
+const deadline = new Date('2025-05-18T03:35:00+08:00');
 let users = [];
 fetch(jsonUrl)
   .then(res => res.json())
@@ -106,15 +106,23 @@ fetch(jsonUrl)
 // 2. 姓名輸入完畢時自動帶出單位與職稱
 document.getElementById('nameInput').addEventListener('blur', function() {
   const name = this.value.trim();
-  const user = users.find(u => u.name === name);
-  if (user) {
-    document.getElementById('unitInput').value = user.unit;
-    document.getElementById('titleInput').value = user.title;
-  } else {
+  if (!name) {
     document.getElementById('unitInput').value = '';
     document.getElementById('titleInput').value = '';
+    return;
   }
+  fetch('https://script.google.com/macros/s/AKfycbx8jyFFta5RmUB60k4GRSmIgwXfwsD72ESiPQ8lCt2NE9Ck1TXIMHqA4tXk8fZ6v4c_/exec' + encodeURIComponent(name))
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('unitInput').value = data.unit || '';
+      document.getElementById('titleInput').value = data.title || '';
+    })
+    .catch(() => {
+      document.getElementById('unitInput').value = '';
+      document.getElementById('titleInput').value = '';
+    });
 });
+
 
 // 3. 表單送出
 document.getElementById('myForm').addEventListener('submit', function(e){
