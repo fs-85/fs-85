@@ -2,38 +2,24 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>填寫失敗</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>填寫失敗</title>
   <style>
-    body {background: #f0ebf8; font-family: sans-serif;}
-    .box {max-width: 360px; margin: 60px auto; padding: 32px 20px; background: #fff; border-radius: 16px; text-align: center; box-shadow: 0 3px 18px #8882;}
-    h2 {color: #c00;}
-    .hint {color: #666;}
+    body { background: #fff0f0; color: #225; text-align: center; padding-top: 60px; }
+    h1 { color: #d10000; }
+    a { display: block; margin-top: 20px; color: #337ab7; }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h2>填寫失敗</h2>
-    <div>您已經回覆過本表單，請勿重複填寫。</div>
-    <div class="hint" style="margin-top:20px;">如有疑問請洽資訊工程師 #216</div>
-  </div>
-<script>
-// 防止用戶按上一頁（僅留 fail.html 於歷史記錄）
-if (window.history && window.history.replaceState) {
-  window.history.replaceState(null, "", window.location.href);
-}
-window.onload = function() {
-  // 直接將上一頁的 index.html 從瀏覽器歷史中移除
-  setTimeout(function() {
-    window.location.replace(window.location.href); // 強制刷新
-  }, 0);
-};
-// 更強一點：當用戶按上一頁，自動再次跳回 fail.html
-window.addEventListener('pageshow', function(event) {
-  if (event.persisted) {
-    window.location.replace(window.location.href);
+  <h1>填寫失敗！</h1>
+  <div>您已經回覆過本表單，請勿重複填寫。</div>
+  <div>如有疑問請洽資訊工程師 #216</div>
+  <a href="#" onclick="closePage(event)">關閉頁面</a>
+  <script>
+  function closePage(event) {
+  event.preventDefault();
+  window.close();
   }
-});
 </script>
 </body>
 </html>
