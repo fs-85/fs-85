@@ -38,7 +38,7 @@
     #msg {
     color: #c00;       /* 紅色 */
     text-align: center;/* 置中 */
-    margin-top: 2px;  /* 距離表單一點間隔，可選 */
+    margin-top: 0.5px;  /* 距離表單一點間隔，可選 */
     font-weight: bold; /* 字體加粗，可選 */
     }
   </style>
@@ -118,7 +118,7 @@ checkboxes.forEach(cb => cb.addEventListener('change', function() {
 document.getElementById('myForm').addEventListener('submit', function(e){
   e.preventDefault();
   if(!document.getElementById('unitInput').value || !document.getElementById('titleInput').value){
-    document.getElementById('msg').innerText = '請輸入正確姓名，才能自動帶出單位和職稱';
+    document.getElementById('msg').innerText = '請輸入正確姓名，才能自動帶出單位和職稱。';
     return;
   }
   let printers = Array.from(document.querySelectorAll('input[name="printer"]:checked')).map(cb=>cb.value);
