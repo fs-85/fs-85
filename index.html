@@ -135,10 +135,10 @@ document.getElementById('myForm').addEventListener('submit', function(e){
     },
     body: JSON.stringify(data)
   }).then(res => {
-    window.location.href = "success.html";
+    window.location.replace("success.html");
     })
     .catch(err => {
-    window.location.href = "fail.html";
+    window.location.replace("fail.html");
     });
 });
 
