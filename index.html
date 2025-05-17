@@ -2,12 +2,38 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>表單範例</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>表單範例（手機友善）</title>
   <style>
-    body { font-family: sans-serif; max-width: 400px; margin: 40px auto; }
-    label { display: block; margin-top: 12px; }
-    input[type="text"]:read-only { background: #eee; }
-    .printer-checkbox { margin-right: 10px; }
+    body { 
+      font-family: sans-serif; 
+      max-width: 400px; 
+      margin: 40px auto; 
+      padding: 10px;
+    }
+    label { 
+      display: block; 
+      margin-top: 12px; 
+    }
+    input[type="text"], button {
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 1.1em;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+    input[type="text"]:read-only { 
+      background: #eee; 
+    }
+    .printer-checkbox { margin-right: 8px; margin-bottom: 5px; }
+    @media (max-width: 600px) {
+      body {
+        max-width: 98%;
+        margin: 10px auto;
+        padding: 4px;
+      }
+      h2 { font-size: 1.3em; }
+    }
   </style>
 </head>
 <body>
@@ -27,34 +53,31 @@
     </label>
     <label>
       印表機（最多選2台）<br>
-      <input type="checkbox" class="printer-checkbox" name="printer" value="A001">A001
-      <input type="checkbox" class="printer-checkbox" name="printer" value="A002">A002
-      <input type="checkbox" class="printer-checkbox" name="printer" value="A003">A003
-      <input type="checkbox" class="printer-checkbox" name="printer" value="A004">A004
-      <input type="checkbox" class="printer-checkbox" name="printer" value="A005">A005
-      <input type="checkbox" class="printer-checkbox" name="printer" value="A006">A006
-      <input type="checkbox" class="printer-checkbox" name="printer" value="A007">A007
-      <input type="checkbox" class="printer-checkbox" name="printer" value="A008">A008
-      <input type="checkbox" class="printer-checkbox" name="printer" value="A009">A009
-      <input type="checkbox" class="printer-checkbox" name="printer" value="A010">A010
+      <span>
+        <input type="checkbox" class="printer-checkbox" name="printer" value="A001">A001
+        <input type="checkbox" class="printer-checkbox" name="printer" value="A002">A002
+        <input type="checkbox" class="printer-checkbox" name="printer" value="A003">A003
+        <input type="checkbox" class="printer-checkbox" name="printer" value="A004">A004
+        <input type="checkbox" class="printer-checkbox" name="printer" value="A005">A005
+        <input type="checkbox" class="printer-checkbox" name="printer" value="A006">A006
+        <input type="checkbox" class="printer-checkbox" name="printer" value="A007">A007
+        <input type="checkbox" class="printer-checkbox" name="printer" value="A008">A008
+        <input type="checkbox" class="printer-checkbox" name="printer" value="A009">A009
+        <input type="checkbox" class="printer-checkbox" name="printer" value="A010">A010
+      </span>
     </label>
-    <br>
     <button type="submit">送出</button>
   </form>
   <div id="msg"></div>
 <script>
-// --- 這裡填入你的 GitHub JSON 原始網址 ---
+// 這裡填入你的 GitHub JSON 原始網址
 const jsonUrl = 'https://raw.githubusercontent.com/fs-85/ss/refs/heads/main/users.json';
-// -----------------------------------------
 
 let users = [];
-
-// 抓取 GitHub 上的 JSON 檔案
 fetch(jsonUrl)
   .then(res => res.json())
   .then(data => { users = data; });
 
-// 當「姓名」輸入後自動帶入單位和職稱
 document.getElementById('nameInput').addEventListener('blur', function() {
   const name = this.value.trim();
   const user = users.find(u => u.name === name);
@@ -67,7 +90,7 @@ document.getElementById('nameInput').addEventListener('blur', function() {
   }
 });
 
-// 限制印表機最多只能選2台
+// 限制最多選2台印表機
 const checkboxes = document.querySelectorAll('input[name="printer"]');
 checkboxes.forEach(cb => cb.addEventListener('change', function() {
   let checked = document.querySelectorAll('input[name="printer"]:checked');
@@ -77,10 +100,8 @@ checkboxes.forEach(cb => cb.addEventListener('change', function() {
   }
 }));
 
-// 表單送出範例（目前只是顯示資料，實務上可再串接後端儲存）
 document.getElementById('myForm').addEventListener('submit', function(e){
   e.preventDefault();
-  // 檢查有沒有自動帶出單位和職稱
   if(!document.getElementById('unitInput').value || !document.getElementById('titleInput').value){
     document.getElementById('msg').innerText = '請輸入正確姓名，才能自動帶出單位和職稱';
     return;
