@@ -91,9 +91,11 @@
     <button type="submit" style="margin-top:13px;">請確認後，再點送出。</button>
   </form>
   <div id="msg"></div>
+  <div id="deadlineMsg"></div>
 <script>
 // 1. 讀取 users.json
 const jsonUrl = 'https://raw.githubusercontent.com/fs-85/ss/refs/heads/main/users.json';
+const deadline = new Date('2025-05-18T02:47:00+08:00');
 let users = [];
 fetch(jsonUrl)
   .then(res => res.json())
@@ -151,6 +153,31 @@ checkboxes.forEach(cb => cb.addEventListener('change', function() {
     alert('最多只能選2台印表機');
   }
 }));
+
+// 5.表單截止時間
+function checkDeadline() {
+  // 取得目前時間（台灣時間）
+  const now = new Date();
+  // 若超過截止
+  if (now > deadline) {
+    // 隱藏表單
+    document.getElementById('myForm').style.display = 'none';
+    // 顯示截止訊息
+    document.getElementById('deadlineMsg').innerHTML = `
+      <div style="color:#c00; font-size:1.4em; text-align:center; margin-top:40px;">
+        表單填寫已截止<br>
+        截止時間：2025/5/18 17:00
+      </div>
+    `;
+  } else {
+    // 表單還開放時，確保訊息消失
+    document.getElementById('myForm').style.display = '';
+    document.getElementById('deadlineMsg').innerHTML = '';
+  }
+}
+
+// 初次載入檢查一次
+checkDeadline();
 </script>
   <div class="footer-note">此表單僅供本分署同仁填寫</div>
 </body>
