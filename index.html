@@ -52,10 +52,10 @@
   </style>
 </head>
 <body>
-  <h1 id="pageTitle" style="font-size:1.9em;margin-bottom:8px;">統計本分署執行科同仁印表機配置狀態</h1>
+  <h1 id="pageTitle" style="font-size:1.9em;margin-bottom:8px;">統計本分署執行科同仁<br>印表機配置狀態</h1>
   <div id="pageDesc" style="color:#555; font-size:1em; margin-bottom:20px; line-height:1.6;">
+	為分配及設定新廳舍執行科辦公室同仁印表機，請協助<br>統計您現有的印表機配置狀態。<br>
     <b>請確實填寫您的姓名</b>，系統將自動帶入股別與職稱。<br>
-    <span style="color:#c00;">※印表機最多只能勾選兩台</span>，請依實際配置狀態勾選。<br>
     如有問題請聯絡<b>資訊工程師#216</b>，謝謝。
   </div>
   <form id="myForm">
@@ -64,7 +64,7 @@
       <input type="text" id="nameInput" required>
     </label>
     <label>
-      單位
+      股別
       <input type="text" id="unitInput" readonly>
     </label>
     <label>
@@ -72,7 +72,7 @@
       <input type="text" id="titleInput" readonly>
     </label>
     <label>
-      印表機（最多選2台）<br>
+      印表機<span style="color:#c00;">（不列入郵簡機，請依目前配置選2台）</span><br>
       <span>
         <input type="checkbox" class="printer-checkbox" name="printer" value="A001">A001
         <input type="checkbox" class="printer-checkbox" name="printer" value="A002">A002
