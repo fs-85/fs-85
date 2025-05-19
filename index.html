@@ -35,7 +35,7 @@
       }
       h2 { font-size: 1.3em; }
     }
-    #msg {
+    #msg, #codeMsg {
       color: #c00;
       text-align: center;
       margin-top: 0.5px;
@@ -52,71 +52,111 @@
   </style>
 </head>
 <body>
-  <h1 id="pageTitle" style="font-size:1.9em;margin-bottom:8px;">統計本分署執行科同仁印表機配置狀態</h1>
-  <div id="pageDesc" style="color:#555; font-size:1em; margin-bottom:20px; line-height:1.6;">
-    1.為分配及設定新廳舍執行科辦公室同仁印表機，請協助<br>統計您現有的印表機配置狀態。<br>
-    2.<b>請確實填寫您的姓名</b>，系統將自動帶入股別與職稱。<br>
-    3.如有問題請聯絡<b>資訊工程師#216</b>，謝謝。<br>
-    <span style="color:#c00;">表單截止時間至5/21(三)下午5:00止</span>
+  <!-- 驗證碼區 -->
+  <div id="codeArea">
+    <h2>請先輸入驗證碼</h2>
+    <input type="text" id="codeInput" placeholder="請輸入驗證碼">
+    <button id="checkCodeBtn">驗證</button>
+    <div id="codeMsg"></div>
   </div>
-  <form id="myForm">
-    <label>
-      姓名
-      <input type="text" id="nameInput" required>
-    </label>
-    <label>
-      股別
-      <input type="text" id="unitInput" readonly>
-    </label>
-    <label>
-      職稱
-      <input type="text" id="titleInput" readonly>
-    </label>
-    <label>
-      印表機<span style="color:#c00;">（不列入郵簡機，請依目前配置選2台）</span><br>
-      <span>
-        <input type="checkbox" class="printer-checkbox" name="printer" value="206">206
-        <input type="checkbox" class="printer-checkbox" name="printer" value="207">207
-        <input type="checkbox" class="printer-checkbox" name="printer" value="208">208
-        <input type="checkbox" class="printer-checkbox" name="printer" value="210">210
-        <input type="checkbox" class="printer-checkbox" name="printer" value="214">214
-        <input type="checkbox" class="printer-checkbox" name="printer" value="215">215
-        <br>
-        <input type="checkbox" class="printer-checkbox" name="printer" value="218">218
-        <input type="checkbox" class="printer-checkbox" name="printer" value="209">219
-        <input type="checkbox" class="printer-checkbox" name="printer" value="233">233
-        <input type="checkbox" class="printer-checkbox" name="printer" value="237">237
-        <input type="checkbox" class="printer-checkbox" name="printer" value="252">252
-      </span>
-    </label>
-    <button type="submit" style="margin-top:13px;">請確認後，再點送出。</button>
-  </form>
-  <div id="msg"></div>
-  <div id="deadlineMsg"></div>
-  <div class="footer-note" id="footerNote">此表單僅供本分署同仁填寫</div>
+
+  <!-- 表單區（預設隱藏） -->
+  <div id="formArea" style="display:none;">
+    <h1 id="pageTitle" style="font-size:1.9em;margin-bottom:8px;">統計本分署執行科同仁印表機配置狀態</h1>
+    <div id="pageDesc" style="color:#555; font-size:1em; margin-bottom:20px; line-height:1.6;">
+      1.為分配及設定新廳舍執行科辦公室同仁印表機，請協助<br>統計您現有的印表機配置狀態。<br>
+      2.<b>請確實填寫您的姓名</b>，系統將自動帶入股別與職稱。<br>
+      3.如有問題請聯絡<b>資訊工程師#216</b>，謝謝。<br>
+      <span style="color:#c00;">表單截止時間至5/21(三)下午5:00止</span>
+    </div>
+    <form id="myForm">
+      <label>
+        姓名
+        <input type="text" id="nameInput" required>
+      </label>
+      <label>
+        股別
+        <input type="text" id="unitInput" readonly>
+      </label>
+      <label>
+        職稱
+        <input type="text" id="titleInput" readonly>
+      </label>
+      <label>
+        印表機<span style="color:#c00;">（不列入郵簡機，請依目前配置選2台）</span><br>
+        <span>
+          <input type="checkbox" class="printer-checkbox" name="printer" value="206">206
+          <input type="checkbox" class="printer-checkbox" name="printer" value="207">207
+          <input type="checkbox" class="printer-checkbox" name="printer" value="208">208
+          <input type="checkbox" class="printer-checkbox" name="printer" value="210">210
+          <input type="checkbox" class="printer-checkbox" name="printer" value="214">214
+          <input type="checkbox" class="printer-checkbox" name="printer" value="215">215
+          <br>
+          <input type="checkbox" class="printer-checkbox" name="printer" value="218">218
+          <input type="checkbox" class="printer-checkbox" name="printer" value="219">219
+          <input type="checkbox" class="printer-checkbox" name="printer" value="233">233
+          <input type="checkbox" class="printer-checkbox" name="printer" value="237">237
+          <input type="checkbox" class="printer-checkbox" name="printer" value="252">252
+        </span>
+      </label>
+      <button type="submit" style="margin-top:13px;">請確認後，再點送出。</button>
+    </form>
+    <div id="msg"></div>
+    <div id="deadlineMsg"></div>
+    <div class="footer-note" id="footerNote">此表單僅供本分署同仁填寫</div>
+  </div>
+
 <script>
-const apiBase = 'https://script.google.com/macros/s/AKfycbzny8n1gFqlhjOtJzOrvUORr99yXfvKmWH9_NfXw-tUlHQ-kbNUJZytjbYyySnkBlKq/exec';
+const apiBase = 'https://script.google.com/macros/s/AKfycbwnLfFfTMwVOrx9nj4AaKv1eTo8_GSGIknkF1UdRf2jE-Y6k2BeFkb73zLzvjOv0XyW/exec';
 const deadline = new Date('2025-05-21T17:00:00+08:00');
 
-document.getElementById('nameInput').addEventListener('blur', function() {
-  const name = this.value.trim();
-  if (!name) {
-    document.getElementById('unitInput').value = '';
-    document.getElementById('titleInput').value = '';
+// 驗證碼流程
+document.getElementById('checkCodeBtn').onclick = function() {
+  const code = document.getElementById('codeInput').value.trim();
+  if(!code) {
+    document.getElementById('codeMsg').innerText = '請輸入驗證碼';
     return;
   }
-  fetch('https://script.google.com/macros/s/AKfycbzny8n1gFqlhjOtJzOrvUORr99yXfvKmWH9_NfXw-tUlHQ-kbNUJZytjbYyySnkBlKq/exec?action=query&name=' + encodeURIComponent(name))
+  // 發送驗證請求
+  fetch(apiBase + '?action=checkcode&code=' + encodeURIComponent(code))
     .then(res => res.json())
     .then(data => {
-      document.getElementById('unitInput').value = data.unit || '';
-      document.getElementById('titleInput').value = data.title || '';
+      if(data.valid) {
+        // 驗證成功：隱藏驗證碼區，顯示表單區
+        document.getElementById('codeArea').style.display = 'none';
+        document.getElementById('formArea').style.display = '';
+      } else {
+        document.getElementById('codeMsg').innerText = '驗證碼錯誤，請重試';
+      }
     })
     .catch(() => {
+      document.getElementById('codeMsg').innerText = '驗證時發生錯誤，請重試';
+    });
+};
+
+// 姓名輸入完畢時自動帶出單位與職稱
+document.getElementById('formArea').addEventListener('blur', function(e) {
+  if(e.target.id === 'nameInput') {
+    const name = e.target.value.trim();
+    if (!name) {
       document.getElementById('unitInput').value = '';
       document.getElementById('titleInput').value = '';
-    });
-});
+      return;
+    }
+    fetch(apiBase + '?action=query&name=' + encodeURIComponent(name))
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('unitInput').value = data.unit || '';
+        document.getElementById('titleInput').value = data.title || '';
+      })
+      .catch(() => {
+        document.getElementById('unitInput').value = '';
+        document.getElementById('titleInput').value = '';
+      });
+  }
+}, true);
 
+// 表單送出（POST）
 document.getElementById('myForm').addEventListener('submit', function(e){
   e.preventDefault();
   if(!document.getElementById('unitInput').value || !document.getElementById('titleInput').value){
@@ -137,7 +177,7 @@ document.getElementById('myForm').addEventListener('submit', function(e){
     printers: printers.join(',')
   });
 
-  fetch('https://script.google.com/macros/s/AKfycbzny8n1gFqlhjOtJzOrvUORr99yXfvKmWH9_NfXw-tUlHQ-kbNUJZytjbYyySnkBlKq/exec?' + params.toString())
+  fetch(apiBase + '?' + params.toString())
     .then(res => res.json())
     .then(result => {
       if(result.status === 'success') {
@@ -151,6 +191,7 @@ document.getElementById('myForm').addEventListener('submit', function(e){
     });
 });
 
+// 限制印表機最多只能選2台
 const checkboxes = document.querySelectorAll('input[name="printer"]');
 checkboxes.forEach(cb => cb.addEventListener('change', function() {
   let checked = document.querySelectorAll('input[name="printer"]:checked');
@@ -160,6 +201,7 @@ checkboxes.forEach(cb => cb.addEventListener('change', function() {
   }
 }));
 
+// 表單截止時間與內容隱藏
 function checkDeadline() {
   const now = new Date();
   if (now > deadline) {
