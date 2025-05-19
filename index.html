@@ -16,6 +16,11 @@
     }
     #msg, #codeMsg { color: #c00; text-align: center; margin-top: 0.5px; font-weight: bold; }
     .footer-note { color: #888; font-size: 1em; text-align: center; margin-top: 32px; margin-bottom: 10px; letter-spacing: 1.5px; }
+    #missingListTable { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+    #missingListTable th, #missingListTable td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+    #missingListTable th { background: #e0d7f8; }
+    #missingListArea { display: none; margin-top: 18px; }
+    #showMissingBtn { margin: 25px auto 0 auto; display: block; width: 80%; font-size: 1em; }
   </style>
 </head>
 <body>
@@ -70,10 +75,13 @@
     <div id="msg"></div>
     <div id="deadlineMsg"></div>
     <div class="footer-note" id="footerNote">此表單僅供本分署同仁填寫</div>
+
+    <button id="showMissingBtn" type="button">查詢尚未回報名單</button>
+    <div id="missingListArea"></div>
   </div>
 
 <script>
-const apiBase = 'https://script.google.com/macros/s/AKfycbwnLfFfTMwVOrx9nj4AaKv1eTo8_GSGIknkF1UdRf2jE-Y6k2BeFkb73zLzvjOv0XyW/exec';
+const apiBase = 'https://script.google.com/macros/s/AKfycbxzm-E2DzykUTRI5npcnBGW4PJ-cJFf3tDb38kfGsmv5YHuHRFyk7yDpjkJ4bYer2ND/exec';
 const deadline = new Date('2025-05-22T12:00:00+08:00');
 
 document.getElementById('checkCodeBtn').onclick = function() {
@@ -187,6 +195,31 @@ function checkDeadline() {
   }
 }
 checkDeadline();
+
+document.getElementById('showMissingBtn').onclick = function() {
+  const btn = document.getElementById('showMissingBtn');
+  const area = document.getElementById('missingListArea');
+  area.innerHTML = '載入中...';
+  area.style.display = 'block';
+  fetch(apiBase + '?action=missing')
+    .then(res => res.json())
+    .then(list => {
+      if(list.length === 0){
+        area.innerHTML = '<div style="color:green;text-align:center;margin-top:12px;">所有人都已經回報完畢！</div>';
+        return;
+      }
+      let html = `<table id="missingListTable">
+        <tr><th>姓名</th><th>股別</th><th>職稱</th></tr>`;
+      list.forEach(x => {
+        html += `<tr><td>${x.name}</td><td>${x.unit}</td><td>${x.title}</td></tr>`;
+      });
+      html += `</table>`;
+      area.innerHTML = html;
+    })
+    .catch(()=>{
+      area.innerHTML = '<div style="color:#c00;text-align:center;margin-top:12px;">查詢失敗，請稍後再試！</div>';
+    });
+};
 </script>
 </body>
 </html>
