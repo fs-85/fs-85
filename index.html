@@ -127,8 +127,7 @@ document.getElementById('myForm').addEventListener('submit', function(e){
   }
   let printers = Array.from(document.querySelectorAll('input[name="printer"]:checked')).map(cb=>cb.value);
   if (printers.length !== 2) {
-    document.getElementById('msg').innerText = '請選擇「兩台」印表機！';
-    document.getElementById('msg').style.color = '#c00';
+    alert('請選擇「兩台」印表機！');
     return;
   }
   let name = document.getElementById('nameInput').value.trim();
