@@ -5,50 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>統計本分署執行科同仁印表機</title>
   <style>
-    body { 
-      font-family: sans-serif; 
-      max-width: 400px; 
-      margin: 40px auto; 
-      padding: 10px 20px 10px 20px;
-      background: #f0ebf8;
-    }
-    label { 
-      display: block; 
-      margin-top: 12px; 
-    }
-    input[type="text"], button {
-      width: 100%;
-      box-sizing: border-box;
-      font-size: 1.1em;
-      margin-top: 4px;
-      margin-bottom: 8px;
-    }
-    input[type="text"]:read-only { 
-      background: #eee; 
-    }
+    body { font-family: sans-serif; max-width: 400px; margin: 40px auto; padding: 10px 20px 10px 20px; background: #f0ebf8;}
+    label { display: block; margin-top: 12px; }
+    input[type="text"], button { width: 100%; box-sizing: border-box; font-size: 1.1em; margin-top: 4px; margin-bottom: 8px; }
+    input[type="text"]:read-only { background: #eee; }
     .printer-checkbox { margin-right: 8px; margin-bottom: 5px; }
     @media (max-width: 600px) {
-      body {
-        max-width: 98%;
-        margin: 10px auto;
-        padding: 6px 14px 12px 14px;
-      }
+      body { max-width: 98%; margin: 10px auto; padding: 6px 14px 12px 14px;}
       h2 { font-size: 1.3em; }
     }
-    #msg, #codeMsg {
-      color: #c00;
-      text-align: center;
-      margin-top: 0.5px;
-      font-weight: bold;
-    }
-    .footer-note {
-      color: #888;
-      font-size: 1em;
-      text-align: center;
-      margin-top: 32px;
-      margin-bottom: 10px;
-      letter-spacing: 1.5px;
-    }
+    #msg, #codeMsg { color: #c00; text-align: center; margin-top: 0.5px; font-weight: bold; }
+    .footer-note { color: #888; font-size: 1em; text-align: center; margin-top: 32px; margin-bottom: 10px; letter-spacing: 1.5px; }
   </style>
 </head>
 <body>
@@ -60,7 +27,6 @@
     <div id="codeMsg"></div>
   </div>
 
-  <!-- 表單區（預設隱藏） -->
   <div id="formArea" style="display:none;">
     <h1 id="pageTitle" style="font-size:1.9em;margin-bottom:8px;">統計本分署執行科同仁印表機配置狀態</h1>
     <div id="pageDesc" style="color:#555; font-size:1em; margin-bottom:20px; line-height:1.6;">
@@ -116,12 +82,10 @@ document.getElementById('checkCodeBtn').onclick = function() {
     document.getElementById('codeMsg').innerText = '請輸入驗證碼';
     return;
   }
-
   fetch(apiBase + '?action=checkcode&code=' + encodeURIComponent(code))
     .then(res => res.json())
     .then(data => {
       if(data.valid) {
-
         document.getElementById('codeArea').style.display = 'none';
         document.getElementById('formArea').style.display = '';
       } else {
@@ -161,10 +125,15 @@ document.getElementById('myForm').addEventListener('submit', function(e){
     document.getElementById('msg').style.color = '#c00';
     return;
   }
+  let printers = Array.from(document.querySelectorAll('input[name="printer"]:checked')).map(cb=>cb.value);
+  if (printers.length !== 2) {
+    document.getElementById('msg').innerText = '請選擇「兩台」印表機！';
+    document.getElementById('msg').style.color = '#c00';
+    return;
+  }
   let name = document.getElementById('nameInput').value.trim();
   let unit = document.getElementById('unitInput').value.trim();
   let title = document.getElementById('titleInput').value.trim();
-  let printers = Array.from(document.querySelectorAll('input[name="printer"]:checked')).map(cb=>cb.value);
 
   let params = new URLSearchParams({
     action: "submit",
