@@ -21,6 +21,25 @@
     #missingListTable th { background: #e0d7f8; }
     #missingListArea { display: none; margin-top: 18px; }
     #showMissingBtn { margin: 25px auto 0 auto; display: block; width: 80%; font-size: 1em; }
+
+    /* 驗證碼區塊整組置中 */
+    #codeArea {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #codeArea h2 {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    #codeArea input[type="text"], #codeArea button {
+      width: 220px;
+      max-width: 90vw;
+      text-align: center;
+      margin-bottom: 12px;
+    }
   </style>
 </head>
 <body>
@@ -76,7 +95,7 @@
     <div id="deadlineMsg"></div>
     <div class="footer-note" id="footerNote">此表單僅供本分署同仁填寫</div>
 
-    <button id="showMissingBtn" type="button">查詢尚未回報名單</button>
+    <button id="showMissingBtn" type="button">↓查詢尚未回報名單↓</button>
     <div id="missingListArea"></div>
   </div>
 
@@ -209,11 +228,14 @@ document.getElementById('showMissingBtn').onclick = function() {
         return;
       }
       let html = `<table id="missingListTable">
-        <tr><th>姓名</th><th>股別</th><th>職稱</th></tr>`;
+        <thead>
+        <tr><th>姓名</th><th>股別</th><th>職稱</th></tr>
+        </thead>
+        <tbody>`;
       list.forEach(x => {
         html += `<tr><td>${x.name}</td><td>${x.unit}</td><td>${x.title}</td></tr>`;
       });
-      html += `</table>`;
+      html += `</tbody></table>`;
       area.innerHTML = html;
     })
     .catch(()=>{
