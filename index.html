@@ -17,7 +17,7 @@
         }
 
         .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; position: relative; }
-        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        h2 { text-align: center; color: #333; margin-bottom: 10px; } /* 標題下距縮小 */
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
         
@@ -31,7 +31,8 @@
         .btn-secondary { width: 100%; padding: 10px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .btn-secondary:hover { background-color: #5a6268; }
 
-        .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        /* 查詢按鈕樣式 (放在最上面) */
+        .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 15px; }
         .btn-info:hover { background-color: #138496; }
 
         button:disabled { background-color: #ccc; cursor: not-allowed; }
@@ -39,7 +40,6 @@
         .readonly-field { background-color: #e9ecef; color: #495057; }
         .hidden { display: none !important; }
         
-        /* 謝謝頁面的大字 */
         .thank-you-msg { text-align: center; color: #28a745; font-size: 2em; margin: 40px 0; font-weight: bold; }
         
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; }
@@ -58,13 +58,15 @@
     </div>
 
     <div class="container hidden" id="formSection">
+        
+        <button class="btn-info" onclick="goToQueryPage()">🔍 我要查詢是否已填報</button>
+
         <h2>115年新股別人員資料</h2>
         
-        <button class="btn-info" onclick="goToQueryPage()" style="margin-bottom: 20px;">🔍 我要查詢是否已填報</button>
+        <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom: 15px;">請選擇姓名更新資料</p>
+        
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
-        <p style="text-align:center; color:#666; font-size:0.9em;">或 輸入姓名更新資料</p>
-        
         <form id="dataForm" onsubmit="submitForm(event)">
             <div class="form-group">
                 <label>1. 姓名 (請選擇)</label>
@@ -81,8 +83,6 @@
                 <label>職稱 (自動帶出)</label>
                 <input type="text" id="autoTitle" class="readonly-field" readonly>
             </div>
-
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
             <div class="form-group">
                 <label>2. 分機 (請輸入4位數字)</label>
@@ -131,7 +131,6 @@
     <div id="loading" class="hidden">載入中...</div>
 
     <script>
-        // 防止 iOS 縮放
         document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
         var lastTouchEnd = 0;
         document.addEventListener('touchend', function (event) {
@@ -141,7 +140,7 @@
         }, false);
 
         // ==========================================
-        // ★★★ 請務必換成新部署的網址 ★★★
+        // ★★★ 請確認網址已是最新部署的版本 ★★★
         // ==========================================
         var scriptURL = "https://script.google.com/macros/s/AKfycbwYSPyDZViJH2mf3zthH3CpMFZwIsPSJwXWKCdbGA_Jnf61snsXEeuF00nfMzk4iLsUlw/exec"; 
         
@@ -166,29 +165,24 @@
                 .then(data => {
                     allData = data;
                     
-                    // 填充「填報頁面」的下拉選單
                     var select = document.getElementById('inputName');
-                    var querySelect = document.getElementById('queryNameSelect'); // 查詢頁面的選單
+                    var querySelect = document.getElementById('queryNameSelect');
                     
-                    // 重置
                     select.innerHTML = '<option value="" disabled selected>請選擇姓名...</option>';
                     querySelect.innerHTML = '<option value="" disabled selected>請選擇姓名...</option>';
                     
                     data.forEach(item => {
-                        // 填報用
                         var option1 = document.createElement('option');
                         option1.value = item.name;
                         option1.text = item.name;
                         select.appendChild(option1);
 
-                        // 查詢用
                         var option2 = document.createElement('option');
                         option2.value = item.name;
                         option2.text = item.name;
                         querySelect.appendChild(option2);
                     });
 
-                    // 切換到表單頁面
                     document.getElementById('loading').classList.add('hidden');
                     document.getElementById('loginSection').classList.add('hidden');
                     document.getElementById('formSection').classList.remove('hidden');
@@ -199,14 +193,34 @@
                 });
         }
 
-        // --- 自動帶出 (填報頁) ---
+        // --- 自動帶出 + 檢查是否已填寫 (核心修改處) ---
         function autoFillInfo() {
             var inputName = document.getElementById('inputName').value;
             var found = allData.find(item => item.name === inputName);
 
             if (found) {
+                // 1. 自動帶出欄位
                 document.getElementById('autoSection').value = found.section;
                 document.getElementById('autoTitle').value = found.title;
+
+                // 2. 偵測 D(extension) 和 E(role) 是否有資料
+                if (found.extension && found.role) {
+                    // 使用 confirm 彈出對話框 (回傳 true 或 false)
+                    // \n 代表換行
+                    var check = confirm("提示：系統偵測到您 (" + found.name + ") 已經回覆過表單。\n\n是否要重新回覆或更新資料？\n\n按「確定」：留在本頁更新資料\n按「取消」：回到首頁");
+                    
+                    if (check) {
+                        // 按下「確定」 -> 什麼都不做，保留在當前頁面讓用戶填寫
+                        // 可選擇是否要預先帶入舊資料，目前保留空白讓用戶重填比較清楚
+                        
+                        // 這裡可以選擇把舊的分機填進去 (看需求)
+                        // document.getElementById('inputExt').value = found.extension; 
+                    } else {
+                        // 按下「取消」 -> 回到主頁 (重新載入)
+                        location.reload();
+                    }
+                }
+
             } else {
                 document.getElementById('autoSection').value = "";
                 document.getElementById('autoTitle').value = "";
@@ -241,8 +255,7 @@
                 mode: 'no-cors' 
             })
             .then(() => {
-                alert("資料已提交！");
-                // 提交成功後，隱藏表單，顯示謝謝頁面
+                // 提交成功後，直接切換到謝謝頁面
                 document.getElementById('formSection').classList.add('hidden');
                 document.getElementById('thankYouSection').classList.remove('hidden');
                 
@@ -257,7 +270,6 @@
             });
         }
 
-        // --- 頁面切換邏輯 ---
         function goToQueryPage() {
             document.getElementById('formSection').classList.add('hidden');
             document.getElementById('querySection').classList.remove('hidden');
@@ -268,7 +280,6 @@
             document.getElementById('formSection').classList.remove('hidden');
         }
 
-        // --- 查詢功能 (新邏輯) ---
         function checkStatus() {
             var name = document.getElementById('queryNameSelect').value;
             if (!name) {
@@ -278,11 +289,8 @@
 
             var found = allData.find(item => item.name === name);
             
-            // 判斷 D列(extension) 和 E列(role) 是否有值
-            // 如果兩者都不為空，代表已填寫
             if (found && found.extension && found.role) {
                 alert("您已回覆過表單！");
-                // 按下確認後，回到主頁 (重新載入頁面，即回到密碼頁)
                 location.reload(); 
             } else {
                 alert("尚未完成填報，或資料尚未同步。");
