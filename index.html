@@ -236,7 +236,7 @@
                 }
 
                 if (isReplied) {
-                    var check = confirm("提示：系統偵測到您已經回覆過表單，是否要重新回覆或更新資料？\n\n按「確定」：留在本頁更新資料\n按「取消」：回到首頁");
+                    var check = confirm("提示：系統偵測到您已經回覆過表單，是否要重新回覆或更新資料？\n\n按「確定」：留在本頁\n按「取消」：回到首頁");
                     if (!check) {
                         location.reload();
                     }
@@ -262,7 +262,7 @@
             }
 
             if (selectElement.value !== "") {
-                var wantToProxy = confirm("僅限任股別書記官選擇，但並詢問您要代回覆嗎？\n\n系統將幫您另外通知工程師。\n\n按「確定」：開放選擇 (將標記為代回覆)\n按「取消」：清空選擇");
+                var wantToProxy = confirm("僅限任股別書記官選擇，您要代選擇回覆嗎？系統將幫您通知資訊工程師。\n\n按「確定」：開放選擇\n按「取消」：清空選擇");
 
                 if (wantToProxy) {
                     isProxyMode = true;
@@ -359,6 +359,7 @@
     </script>
 </body>
 </html>
+
 
 
 
