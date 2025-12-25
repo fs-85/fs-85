@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>人員資料填報系統</title>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
@@ -10,7 +10,10 @@
         h2 { text-align: center; color: #333; margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        
+        /* [修正重點 2] 設定 font-size: 16px 防止 iPhone 點擊輸入框時自動放大 */
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        
         input:focus { border-color: #4CAF50; outline: none; }
         button { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         button:hover { background-color: #45a049; }
@@ -19,7 +22,7 @@
         /* 唯讀欄位樣式 */
         .readonly-field { background-color: #e9ecef; color: #495057; }
         
-        /* [修正重點] 加上 !important 強制隱藏，解決被 ID 權重覆蓋的問題 */
+        /* 隱藏區塊 - 使用 !important 確保權重 */
         .hidden { display: none !important; }
         
         /* 載入中遮罩 */
