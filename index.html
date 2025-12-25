@@ -17,8 +17,7 @@
         }
 
         .container { 
-            background: white; 
-            /* 維持：上方 padding 20px，配合按鈕下方 margin 10px，達成視覺平衡 */
+            background: white;
             padding: 20px 2rem 2rem 2rem; 
             border-radius: 8px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
@@ -75,7 +74,8 @@
         <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom: 2px; margin-top: 0; line-height: 1.5;">
             1.選擇姓名將自動帶入新股別<br>
             2.輸入新股別所坐的位置分機<br>
-            3.選擇所屬助理案管帳號掛名
+            3.選擇所屬助理案管帳號掛名<br>
+            ⚠️非本人同意請勿回覆表單⚠️
         </p>
         
         <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
@@ -152,10 +152,7 @@
             lastTouchEnd = now;
         }, false);
 
-        // ==========================================
-        // ★★★ 請確認網址已是最新部署的版本 ★★★
-        // ==========================================
-        var scriptURL = "https://script.google.com/macros/s/AKfycbzgnBhaGi7e5dZhvI6nivHJGu7RMYJJJGIehkAhlZc7pHhZ-x4c5DtpZqPN9gThCAHYgg/exec"; 
+        var scriptURL = "https://script.google.com/macros/s/AKfycbxu4hwRARYRTJTayZxF0nm0lZZJ-TmIlXD43WvRg9coANqOYkhtGfdKSz_U7PBOUQ7iRA/exec"; 
         
         var allData = []; 
         var currentUserPermission = ''; 
@@ -221,22 +218,18 @@
                 
                 currentUserPermission = found.permission;
 
-                // 權限設定
                 if (currentUserPermission === 'v') {
                     roleSelect.required = true;
                 } else {
                     roleSelect.required = false;
                 }
 
-                // [修改] 偵測是否已填寫的邏輯 (分流處理)
                 var isReplied = false;
                 if (currentUserPermission === 'v') {
-                    // 有權限者：D列(分機) AND E列(職務) 都要有
                     if (found.extension && found.role) {
                         isReplied = true;
                     }
                 } else {
-                    // 無權限者：只要 D列(分機) 有就算
                     if (found.extension) {
                         isReplied = true;
                     }
@@ -263,13 +256,11 @@
                 return;
             }
 
-            // 有 'v' 的人，直接通過
             if (currentUserPermission === 'v') {
                 isProxyMode = false;
                 return; 
             }
 
-            // 無註記的人，若試圖選擇，彈出代回覆詢問
             if (selectElement.value !== "") {
                 var wantToProxy = confirm("僅限任股別書記官選擇，但並詢問您要代回覆嗎？\n\n系統將幫您另外通知工程師。\n\n按「確定」：開放選擇 (將標記為代回覆)\n按「取消」：清空選擇");
 
@@ -343,16 +334,13 @@
             var found = allData.find(item => item.name === name);
 
             if (found) {
-                // [修改] 查詢頁面的判斷邏輯也同步更新
                 var isReplied = false;
                 
                 if (found.permission === 'v') {
-                    // 有權限者：需 D + E
                     if (found.extension && found.role) {
                         isReplied = true;
                     }
                 } else {
-                    // 無權限者：需 D
                     if (found.extension) {
                         isReplied = true;
                     }
@@ -371,4 +359,3 @@
     </script>
 </body>
 </html>
-
