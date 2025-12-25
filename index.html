@@ -50,6 +50,8 @@
         
         .thank-you-msg { text-align: center; color: #28a745; font-size: 2em; margin: 40px 0; font-weight: bold; }
         
+        .closed-msg { text-align: center; color: #dc3545; font-size: 2em; margin: 40px 0; font-weight: bold; }
+        
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; }
     </style>
 </head>
@@ -64,27 +66,28 @@
         <button class="btn-primary" onclick="checkPassword()">送出</button>
         
         <p style="text-align:center; color:#888; font-size: 0.9em; margin-top: 10px; margin-bottom: 0;">
-            表單截止時間12/27 下午17:00
+            截止時間：12/27 17:00
         </p>
 
         <p id="loginMsg" style="color:red; text-align:center; margin-top:10px;"></p>
     </div>
 
-    <div class="container hidden" id="formSection">
-        
-        <button class="btn-info" onclick="goToQueryPage()">🔍 我要查詢是否已填報</button>
+    <div class="container hidden" id="closedSection">
+        <div class="closed-msg">表單已截止！</div>
+        <p style="text-align:center; color:#666;">此表單已於 12/27 17:00 停止接收回應。</p>
+        <p style="text-align:center; color:#666;">如有疑問請聯繫管理人員。</p>
+    </div>
 
+    <div class="container hidden" id="formSection">
+        <button class="btn-info" onclick="goToQueryPage()">🔍 我要查詢是否已填報</button>
         <h2>115年新股別人員資料</h2>
-        
         <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom: 2px; margin-top: 0; line-height: 1.5;">
             1.選擇姓名將自動帶入新股別<br>
             2.輸入新股別所坐的位置分機<br>
-            3.選擇所屬助理案管系統掛名<br>
+            3.選擇所屬助理案管帳號掛名<br>
             ⚠️未相關人員，勿回覆表單⚠️
         </p>
-        
         <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
-
         <form id="dataForm" onsubmit="submitForm(event)">
             <div class="form-group">
                 <label>1. 姓名</label>
@@ -92,7 +95,6 @@
                     <option value="" disabled selected>載入中...</option>
                 </select>
             </div>
-
             <div class="form-group">
                 <label>股別</label>
                 <input type="text" id="autoSection" class="readonly-field" readonly>
@@ -101,26 +103,22 @@
                 <label>職稱</label>
                 <input type="text" id="autoTitle" class="readonly-field" readonly>
             </div>
-
             <div class="form-group">
                 <label>2. 分機</label>
                 <input type="text" id="inputExt" pattern="\d{4}" maxlength="4" placeholder="例如: 3216" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             </div>
-
             <div class="form-group">
-                <label>3. 助理案管系統帳號掛名</label>
+                <label>3. 助理案管系統掛名人員</label>
                 <select id="inputRole" onchange="checkRolePermission(this)">
                     <option value="" disabled selected>請選擇...</option>
                     <option value="書記官">書記官</option>
                     <option value="執行員">執行員</option>
                 </select>
             </div>
-
             <div class="form-group">
                 <label>4. 備註</label>
                 <input type="text" id="inputNote" placeholder="選填">
             </div>
-
             <button type="submit" id="submitBtn" class="btn-primary">提交資料</button>
         </form>
     </div>
@@ -128,14 +126,12 @@
     <div class="container hidden" id="querySection">
         <h2 style="margin-top: 10px;">查詢回覆狀態</h2>
         <p style="text-align:center; color:#666;">請選擇您的姓名進行查詢</p>
-        
         <div class="form-group">
             <label>請選擇姓名</label>
             <select id="queryNameSelect">
                 <option value="" disabled selected>請選擇...</option>
             </select>
         </div>
-        
         <button class="btn-primary" onclick="checkStatus()">查詢</button>
         <button class="btn-secondary" onclick="backToForm()">返回填報頁面</button>
     </div>
@@ -163,12 +159,21 @@
         var currentUserPermission = ''; 
         var isProxyMode = false;        
 
-        var DEADLINE_DATE = new Date("2025-12-26T02:42:00");
+        var DEADLINE_DATE = new Date("2025-12-26T02:49:00");
+
+        window.onload = function() {
+            var now = new Date();
+            if (now > DEADLINE_DATE) {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('closedSection').classList.remove('hidden');
+            }
+        };
 
         function checkPassword() {
             var now = new Date();
             if (now > DEADLINE_DATE) {
-                document.getElementById('loginMsg').innerText = "表單已截止！";
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('closedSection').classList.remove('hidden');
                 return;
             }
 
@@ -220,7 +225,6 @@
             var inputName = document.getElementById('inputName').value;
             var found = allData.find(item => item.name === inputName);
 
-            // 重置狀態
             isProxyMode = false;
             var roleSelect = document.getElementById('inputRole');
             roleSelect.value = ""; 
