@@ -178,6 +178,9 @@
             lastTouchEnd = now;
         }, false);
 
+        // =========================================================
+        // 請確認這裡的網址是您「更新 doGet 後」新部署的網址
+        // =========================================================
         var scriptURL = "https://script.google.com/macros/s/AKfycbyssUyipnIlJkSkpwCfBqt6oHlSLx8nI2xzf4SWcrDEQuBhHT-_0WI1CWaIUamLM3SZbQ/exec"; 
         
         var allData = []; 
@@ -253,6 +256,10 @@
             isProxyMode = false;
             var roleSelect = document.getElementById('inputRole');
             roleSelect.value = ""; 
+            
+            // 清空舊資料
+            document.getElementById('inputExt').value = "";
+            document.getElementById('inputNote').value = "";
 
             if (found) {
                 document.getElementById('autoSection').value = found.section;
@@ -278,8 +285,24 @@
                 }
 
                 if (isReplied) {
-                    var check = confirm("提示：系統偵測到您已經回覆過表單，是否要重新回覆或更新資料？\n\n按「確定」：留在本頁\n按「取消」：回到首頁");
-                    if (!check) {
+                    var check = confirm("提示：系統偵測到您已經回覆過表單，是否要重新回覆或更新資料？\n\n按「確定」：留在本頁 (並帶入舊資料)\n按「取消」：回到首頁");
+                    if (check) {
+                        // [新增] 用戶選擇留在本頁時，自動帶入舊資料
+                        if (found.extension) {
+                            document.getElementById('inputExt').value = found.extension;
+                        }
+                        
+                        if (found.role) {
+                            // 資料庫可能有 "書記官(代)"，但下拉選單只有 "書記官"
+                            // 所以要移除 "(代)" 才能正確選取
+                            var cleanRole = found.role.replace("(代)", "");
+                            roleSelect.value = cleanRole;
+                        }
+
+                        if (found.note) {
+                            document.getElementById('inputNote').value = found.note;
+                        }
+                    } else {
                         location.reload();
                     }
                 }
@@ -325,7 +348,6 @@
                 return;
             }
 
-            // [檢查] 這裡會檢查長度，如果不滿 4 碼就跳出警告
             if (document.getElementById('inputExt').value.length !== 4) {
                 alert("不足4碼，需輸入4碼！");
                 return;
