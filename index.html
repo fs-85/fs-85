@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>人員資料填報系統</title>
     <style>
-        /* 禁止手勢縮放 */
         body { 
             font-family: "Microsoft JhengHei", sans-serif; 
             background-color: #f0f2f5; 
@@ -17,23 +16,31 @@
             touch-action: pan-x pan-y; 
         }
 
-        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; position: relative; }
         h2 { text-align: center; color: #333; margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
         
-        /* 字體 16px 防止 iOS 自動放大 */
         input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; background-color: white; }
-        
         input:focus, select:focus { border-color: #4CAF50; outline: none; }
-        button { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        button:hover { background-color: #45a049; }
+        
+        /* 按鈕樣式 */
+        .btn-primary { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-primary:hover { background-color: #45a049; }
+        
+        .btn-secondary { width: 100%; padding: 10px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-secondary:hover { background-color: #5a6268; }
+
+        .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-info:hover { background-color: #138496; }
+
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         
         .readonly-field { background-color: #e9ecef; color: #495057; }
-        
-        /* 強制隱藏 */
         .hidden { display: none !important; }
+        
+        /* 謝謝頁面的大字 */
+        .thank-you-msg { text-align: center; color: #28a745; font-size: 2em; margin: 40px 0; font-weight: bold; }
         
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; }
     </style>
@@ -41,18 +48,22 @@
 <body>
 
     <div class="container" id="loginSection">
-        <h2>表單登入</h2>
+        <h2>系統登入</h2>
         <div class="form-group">
             <label>請輸入存取密碼</label>
             <input type="password" id="passwordInput" placeholder="請輸入密碼">
         </div>
-        <button onclick="checkPassword()">送出</button>
+        <button class="btn-primary" onclick="checkPassword()">進入表單</button>
         <p id="loginMsg" style="color:red; text-align:center; margin-top:10px;"></p>
     </div>
 
     <div class="container hidden" id="formSection">
         <h2>115年新股別人員資料</h2>
-        <p style="text-align:center; color:#666; font-size:0.9em;">請選擇姓名查詢資料並更新分機與備註</p>
+        
+        <button class="btn-info" onclick="goToQueryPage()" style="margin-bottom: 20px;">🔍 我要查詢是否已填報</button>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <p style="text-align:center; color:#666; font-size:0.9em;">或 輸入姓名更新資料</p>
         
         <form id="dataForm" onsubmit="submitForm(event)">
             <div class="form-group">
@@ -92,8 +103,29 @@
                 <input type="text" id="inputNote" placeholder="選填">
             </div>
 
-            <button type="submit" id="submitBtn">提交資料</button>
+            <button type="submit" id="submitBtn" class="btn-primary">提交資料</button>
         </form>
+    </div>
+
+    <div class="container hidden" id="querySection">
+        <h2>查詢回覆狀態</h2>
+        <p style="text-align:center; color:#666;">請選擇您的姓名進行查詢</p>
+        
+        <div class="form-group">
+            <label>請選擇姓名</label>
+            <select id="queryNameSelect">
+                <option value="" disabled selected>請選擇...</option>
+            </select>
+        </div>
+        
+        <button class="btn-primary" onclick="checkStatus()">查詢</button>
+        <button class="btn-secondary" onclick="backToForm()">返回填報頁面</button>
+    </div>
+
+    <div class="container hidden" id="thankYouSection">
+        <div class="thank-you-msg">謝謝！</div>
+        <p style="text-align:center;">您的資料已成功提交。</p>
+        <button class="btn-primary" onclick="location.reload()">回到首頁</button>
     </div>
 
     <div id="loading" class="hidden">載入中...</div>
@@ -109,12 +141,13 @@
         }, false);
 
         // ==========================================
-        // 請確認這個網址是你最新部署的網址
+        // ★★★ 請務必換成新部署的網址 ★★★
         // ==========================================
-        var scriptURL = "https://script.google.com/macros/s/AKfycbwE8BYX8SMcqu_TtMNMjzIUdFZjkJ78Eh0MbuRf42SJUVVRRv5aWKri63gK12xqsKv3nw/exec"; 
+        var scriptURL = "https://script.google.com/macros/s/AKfycbwYSPyDZViJH2mf3zthH3CpMFZwIsPSJwXWKCdbGA_Jnf61snsXEeuF00nfMzk4iLsUlw/exec"; 
         
         var allData = []; 
 
+        // --- 登入邏輯 ---
         function checkPassword() {
             var pwd = document.getElementById('passwordInput').value;
             if (pwd === 'chy') {
@@ -126,23 +159,36 @@
             }
         }
 
+        // --- 抓取資料 ---
         function fetchData() {
             fetch(scriptURL)
                 .then(response => response.json())
                 .then(data => {
                     allData = data;
                     
-                    // [修改] 填充 select 下拉選單
+                    // 填充「填報頁面」的下拉選單
                     var select = document.getElementById('inputName');
-                    select.innerHTML = '<option value="" disabled selected>請選擇姓名...</option>'; // 重置並加入預設選項
+                    var querySelect = document.getElementById('queryNameSelect'); // 查詢頁面的選單
+                    
+                    // 重置
+                    select.innerHTML = '<option value="" disabled selected>請選擇姓名...</option>';
+                    querySelect.innerHTML = '<option value="" disabled selected>請選擇姓名...</option>';
                     
                     data.forEach(item => {
-                        var option = document.createElement('option');
-                        option.value = item.name;
-                        option.text = item.name; // 顯示文字
-                        select.appendChild(option);
+                        // 填報用
+                        var option1 = document.createElement('option');
+                        option1.value = item.name;
+                        option1.text = item.name;
+                        select.appendChild(option1);
+
+                        // 查詢用
+                        var option2 = document.createElement('option');
+                        option2.value = item.name;
+                        option2.text = item.name;
+                        querySelect.appendChild(option2);
                     });
 
+                    // 切換到表單頁面
                     document.getElementById('loading').classList.add('hidden');
                     document.getElementById('loginSection').classList.add('hidden');
                     document.getElementById('formSection').classList.remove('hidden');
@@ -153,6 +199,7 @@
                 });
         }
 
+        // --- 自動帶出 (填報頁) ---
         function autoFillInfo() {
             var inputName = document.getElementById('inputName').value;
             var found = allData.find(item => item.name === inputName);
@@ -166,6 +213,7 @@
             }
         }
 
+        // --- 提交資料 ---
         function submitForm(e) {
             e.preventDefault(); 
             
@@ -194,12 +242,9 @@
             })
             .then(() => {
                 alert("資料已提交！");
-                // 重置表單，但保留下拉選單的預設值
-                document.getElementById('dataForm').reset();
-                document.getElementById('autoSection').value = "";
-                document.getElementById('autoTitle').value = "";
-                // 讓姓名選單回到「請選擇...」
-                document.getElementById('inputName').value = ""; 
+                // 提交成功後，隱藏表單，顯示謝謝頁面
+                document.getElementById('formSection').classList.add('hidden');
+                document.getElementById('thankYouSection').classList.remove('hidden');
                 
                 btn.disabled = false;
                 btn.innerText = "提交資料";
@@ -210,6 +255,38 @@
                 btn.disabled = false;
                 btn.innerText = "提交資料";
             });
+        }
+
+        // --- 頁面切換邏輯 ---
+        function goToQueryPage() {
+            document.getElementById('formSection').classList.add('hidden');
+            document.getElementById('querySection').classList.remove('hidden');
+        }
+
+        function backToForm() {
+            document.getElementById('querySection').classList.add('hidden');
+            document.getElementById('formSection').classList.remove('hidden');
+        }
+
+        // --- 查詢功能 (新邏輯) ---
+        function checkStatus() {
+            var name = document.getElementById('queryNameSelect').value;
+            if (!name) {
+                alert("請先選擇姓名！");
+                return;
+            }
+
+            var found = allData.find(item => item.name === name);
+            
+            // 判斷 D列(extension) 和 E列(role) 是否有值
+            // 如果兩者都不為空，代表已填寫
+            if (found && found.extension && found.role) {
+                alert("您已回覆過表單！");
+                // 按下確認後，回到主頁 (重新載入頁面，即回到密碼頁)
+                location.reload(); 
+            } else {
+                alert("尚未完成填報，或資料尚未同步。");
+            }
         }
     </script>
 </body>
