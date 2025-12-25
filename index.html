@@ -18,6 +18,7 @@
 
         .container { 
             background: white; 
+            /* 維持：上方 padding 20px，配合按鈕下方 margin 10px，達成視覺平衡 */
             padding: 20px 2rem 2rem 2rem; 
             border-radius: 8px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
@@ -212,7 +213,7 @@
             // 重置狀態
             isProxyMode = false;
             var roleSelect = document.getElementById('inputRole');
-            roleSelect.value = ""; // 切換名字時重置選單
+            roleSelect.value = ""; 
 
             if (found) {
                 document.getElementById('autoSection').value = found.section;
@@ -220,17 +221,28 @@
                 
                 currentUserPermission = found.permission;
 
-                // 核心邏輯修改：
-                // 如果有 'v' -> 設為必填 (required=true)
-                // 如果沒 'v' -> 設為選填 (required=false)
+                // 權限設定
                 if (currentUserPermission === 'v') {
                     roleSelect.required = true;
                 } else {
                     roleSelect.required = false;
                 }
 
-                // 偵測是否已填寫
-                if (found.extension && found.role) {
+                // [修改] 偵測是否已填寫的邏輯 (分流處理)
+                var isReplied = false;
+                if (currentUserPermission === 'v') {
+                    // 有權限者：D列(分機) AND E列(職務) 都要有
+                    if (found.extension && found.role) {
+                        isReplied = true;
+                    }
+                } else {
+                    // 無權限者：只要 D列(分機) 有就算
+                    if (found.extension) {
+                        isReplied = true;
+                    }
+                }
+
+                if (isReplied) {
                     var check = confirm("提示：系統偵測到此人員已經回覆過表單。\n\n是否要重新回覆或更新資料？\n\n按「確定」：留在本頁更新資料\n按「取消」：回到首頁");
                     if (!check) {
                         location.reload();
@@ -245,28 +257,25 @@
         }
 
         function checkRolePermission(selectElement) {
-            // 還沒選名字不能選職務
             if (!document.getElementById('inputName').value) {
                 alert("請先選擇姓名！");
                 selectElement.value = "";
                 return;
             }
 
-            // 如果該員有權限 ('v')，直接允許，不跳視窗
+            // 有 'v' 的人，直接通過
             if (currentUserPermission === 'v') {
                 isProxyMode = false;
                 return; 
             }
 
-            // 如果該員無權限，但用戶試圖選擇了某個值，跳出代回覆詢問
+            // 無註記的人，若試圖選擇，彈出代回覆詢問
             if (selectElement.value !== "") {
                 var wantToProxy = confirm("僅限任股別書記官選擇，但並詢問您要代回覆嗎？\n\n系統將幫您另外通知工程師。\n\n按「確定」：開放選擇 (將標記為代回覆)\n按「取消」：清空選擇");
 
                 if (wantToProxy) {
                     isProxyMode = true;
-                    // 保留使用者的選擇
                 } else {
-                    // 取消 -> 清空選擇
                     selectElement.value = "";
                     isProxyMode = false;
                 }
@@ -332,12 +341,31 @@
             }
 
             var found = allData.find(item => item.name === name);
-            
-            if (found && found.extension && found.role) {
-                alert("您已回覆過表單！");
-                location.reload(); 
+
+            if (found) {
+                // [修改] 查詢頁面的判斷邏輯也同步更新
+                var isReplied = false;
+                
+                if (found.permission === 'v') {
+                    // 有權限者：需 D + E
+                    if (found.extension && found.role) {
+                        isReplied = true;
+                    }
+                } else {
+                    // 無權限者：需 D
+                    if (found.extension) {
+                        isReplied = true;
+                    }
+                }
+
+                if (isReplied) {
+                    alert("您已回覆過表單！");
+                    location.reload(); 
+                } else {
+                    alert("尚未完成填報，或資料尚未同步。");
+                }
             } else {
-                alert("尚未完成填報，或資料尚未同步。");
+                alert("找不到該人員資料。");
             }
         }
     </script>
