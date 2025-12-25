@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>人員資料填報系統</title>
     <style>
-        /* [修正 1] 加入 touch-action 禁止瀏覽器預設的縮放手勢，但保留捲動功能 */
+        /* 禁止手勢縮放 */
         body { 
             font-family: "Microsoft JhengHei", sans-serif; 
             background-color: #f0f2f5; 
@@ -22,10 +22,10 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
         
-        /* 字體維持 16px 防止 iOS 輸入時自動放大 */
-        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        /* 字體 16px 防止 iOS 自動放大 */
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; background-color: white; }
         
-        input:focus { border-color: #4CAF50; outline: none; }
+        input:focus, select:focus { border-color: #4CAF50; outline: none; }
         button { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         button:hover { background-color: #45a049; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
@@ -41,24 +41,25 @@
 <body>
 
     <div class="container" id="loginSection">
-        <h2>系統登入</h2>
+        <h2>表單登入</h2>
         <div class="form-group">
             <label>請輸入存取密碼</label>
             <input type="password" id="passwordInput" placeholder="請輸入密碼">
         </div>
-        <button onclick="checkPassword()">進入表單</button>
+        <button onclick="checkPassword()">送出</button>
         <p id="loginMsg" style="color:red; text-align:center; margin-top:10px;"></p>
     </div>
 
     <div class="container hidden" id="formSection">
         <h2>115年新股別人員資料</h2>
-        <p style="text-align:center; color:#666; font-size:0.9em;">請輸入姓名查詢資料並更新分機與備註</p>
+        <p style="text-align:center; color:#666; font-size:0.9em;">請選擇姓名查詢資料並更新分機與備註</p>
         
         <form id="dataForm" onsubmit="submitForm(event)">
             <div class="form-group">
-                <label>1. 姓名 (輸入後按 Enter 或點擊空白處)</label>
-                <input type="text" id="inputName" list="nameList" placeholder="請輸入姓名" onchange="autoFillInfo()" required>
-                <datalist id="nameList"></datalist>
+                <label>1. 姓名 (請選擇)</label>
+                <select id="inputName" onchange="autoFillInfo()" required>
+                    <option value="" disabled selected>載入中...</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -98,24 +99,18 @@
     <div id="loading" class="hidden">載入中...</div>
 
     <script>
-        // ==========================================
-        // [修正 2] 強制禁止 iOS Safari 的雙指縮放行為
-        // ==========================================
-        document.addEventListener('gesturestart', function (e) {
-            e.preventDefault();
-        });
-
-        // 防止雙擊放大 (除了 input 以外的地方)
+        // 防止 iOS 縮放
+        document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
         var lastTouchEnd = 0;
         document.addEventListener('touchend', function (event) {
             var now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
-            }
+            if (now - lastTouchEnd <= 300) { event.preventDefault(); }
             lastTouchEnd = now;
         }, false);
-        // ==========================================
 
+        // ==========================================
+        // 請確認這個網址是你最新部署的網址
+        // ==========================================
         var scriptURL = "https://script.google.com/macros/s/AKfycbwE8BYX8SMcqu_TtMNMjzIUdFZjkJ78Eh0MbuRf42SJUVVRRv5aWKri63gK12xqsKv3nw/exec"; 
         
         var allData = []; 
@@ -136,12 +131,16 @@
                 .then(response => response.json())
                 .then(data => {
                     allData = data;
-                    var list = document.getElementById('nameList');
-                    list.innerHTML = "";
+                    
+                    // [修改] 填充 select 下拉選單
+                    var select = document.getElementById('inputName');
+                    select.innerHTML = '<option value="" disabled selected>請選擇姓名...</option>'; // 重置並加入預設選項
+                    
                     data.forEach(item => {
                         var option = document.createElement('option');
                         option.value = item.name;
-                        list.appendChild(option);
+                        option.text = item.name; // 顯示文字
+                        select.appendChild(option);
                     });
 
                     document.getElementById('loading').classList.add('hidden');
@@ -173,7 +172,7 @@
             var name = document.getElementById('inputName').value;
             var found = allData.find(item => item.name === name);
             if (!found) {
-                alert("請輸入正確的人員姓名 (需在清單內)");
+                alert("請選擇正確的人員姓名");
                 return;
             }
 
@@ -195,9 +194,13 @@
             })
             .then(() => {
                 alert("資料已提交！");
+                // 重置表單，但保留下拉選單的預設值
                 document.getElementById('dataForm').reset();
                 document.getElementById('autoSection').value = "";
                 document.getElementById('autoTitle').value = "";
+                // 讓姓名選單回到「請選擇...」
+                document.getElementById('inputName').value = ""; 
+                
                 btn.disabled = false;
                 btn.innerText = "提交資料";
             })
