@@ -114,7 +114,7 @@
             </div>
             <div class="form-group">
                 <label>2. 分機</label>
-                <input type="text" id="inputExt" pattern="\d{4}" maxlength="4" placeholder="例如: 3216" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <input type="text" id="inputExt" maxlength="4" placeholder="例如: 3216" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             </div>
             <div class="form-group">
                 <label>3. 助理案管系統帳號掛名</label>
@@ -156,7 +156,7 @@
                     </tr>
                 </thead>
                 <tbody id="statusTableBody">
-                    </tbody>
+                </tbody>
             </table>
         </div>
     </div>
@@ -325,6 +325,7 @@
                 return;
             }
 
+            // [檢查] 這裡會檢查長度，如果不滿 4 碼就跳出警告
             if (document.getElementById('inputExt').value.length !== 4) {
                 alert("不足4碼，需輸入4碼！");
                 return;
@@ -409,7 +410,7 @@
 
         function showAllStatus() {
             var tbody = document.getElementById('statusTableBody');
-            tbody.innerHTML = "";
+            tbody.innerHTML = ""; 
 
             allData.forEach(function(item) {
                 var isReplied = false;
@@ -446,8 +447,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
