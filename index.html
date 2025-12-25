@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人員資料填報系統</title>
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        input:focus { border-color: #4CAF50; outline: none; }
+        button { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        button:hover { background-color: #45a049; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        
+        /* 唯讀欄位樣式 */
+        .readonly-field { background-color: #e9ecef; color: #495057; }
+        
+        /* 隱藏區塊 */
+        .hidden { display: none; }
+        
+        /* 載入中遮罩 */
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="loginSection">
+        <h2>系統登入</h2>
+        <div class="form-group">
+            <label>請輸入存取密碼</label>
+            <input type="password" id="passwordInput" placeholder="請輸入密碼">
+        </div>
+        <button onclick="checkPassword()">進入表單</button>
+        <p id="loginMsg" style="color:red; text-align:center; margin-top:10px;"></p>
+    </div>
+
+    <div class="container hidden" id="formSection">
+        <h2>115年新股別人員資料</h2>
+        <p style="text-align:center; color:#666; font-size:0.9em;">請輸入姓名查詢資料並更新分機與備註</p>
+        
+        <form id="dataForm" onsubmit="submitForm(event)">
+            <div class="form-group">
+                <label>1. 姓名 (輸入後按 Enter 或點擊空白處)</label>
+                <input type="text" id="inputName" list="nameList" placeholder="請輸入姓名" onchange="autoFillInfo()" required>
+                <datalist id="nameList"></datalist>
+            </div>
+
+            <div class="form-group">
+                <label>股別 (自動帶出)</label>
+                <input type="text" id="autoSection" class="readonly-field" readonly>
+            </div>
+            <div class="form-group">
+                <label>職稱 (自動帶出)</label>
+                <input type="text" id="autoTitle" class="readonly-field" readonly>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+            <div class="form-group">
+                <label>2. 分機 (請輸入4位數字)</label>
+                <input type="text" id="inputExt" pattern="\d{4}" maxlength="4" placeholder="例如: 1234" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            </div>
+
+            <div class="form-group">
+                <label>3. 職務選擇</label>
+                <select id="inputRole" required>
+                    <option value="" disabled selected>請選擇...</option>
+                    <option value="書記官">書記官</option>
+                    <option value="執行員">執行員</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>4. 備註</label>
+                <input type="text" id="inputNote" placeholder="選填">
+            </div>
+
+            <button type="submit" id="submitBtn">提交資料</button>
+        </form>
+    </div>
+
+    <div id="loading" class="hidden">載入中...</div>
+
+    <script>
+        // ==========================================
+        // 請將下方的網址替換成你的 GAS 網頁應用程式網址
+        // ==========================================
+        var scriptURL = "https://script.google.com/macros/s/AKfycbw4DCO2VnQnzmWatNeAx3k1_Sjm0_k7gwZibsKJ9OqfZDLk_v9O-cFfGbAjSsPpvLWszA/exec"; 
+        
+        var allData = []; // 儲存從試算表抓下來的人員名單
+
+        // 1. 檢查密碼
+        function checkPassword() {
+            var pwd = document.getElementById('passwordInput').value;
+            if (pwd === 'chy') {
+                document.getElementById('loading').classList.remove('hidden');
+                // 密碼正確後，先去抓取試算表的人員名單
+                fetchData();
+            } else {
+                document.getElementById('loginMsg').innerText = "密碼錯誤";
+                document.getElementById('passwordInput').value = "";
+            }
+        }
+
+        // 2. 從 Google Sheet 抓取人員名單 (doGet)
+        function fetchData() {
+            fetch(scriptURL)
+                .then(response => response.json())
+                .then(data => {
+                    allData = data;
+                    // 建立 datalist 讓使用者打字有建議名單
+                    var list = document.getElementById('nameList');
+                    list.innerHTML = "";
+                    data.forEach(item => {
+                        var option = document.createElement('option');
+                        option.value = item.name;
+                        list.appendChild(option);
+                    });
+
+                    // 切換顯示區塊
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('formSection').classList.remove('hidden');
+                })
+                .catch(error => {
+                    alert('讀取資料失敗，請檢查網路或連結。' + error);
+                    document.getElementById('loading').classList.add('hidden');
+                });
+        }
+
+        // 3. 自動帶出股別與職稱
+        function autoFillInfo() {
+            var inputName = document.getElementById('inputName').value;
+            // 在下載的資料中尋找這個名字
+            var found = allData.find(item => item.name === inputName);
+
+            if (found) {
+                document.getElementById('autoSection').value = found.section;
+                document.getElementById('autoTitle').value = found.title;
+            } else {
+                document.getElementById('autoSection').value = "";
+                document.getElementById('autoTitle').value = "";
+                // 這裡可以選擇是否提示找不到人，或靜默
+            }
+        }
+
+        // 4. 提交表單 (doPost)
+        function submitForm(e) {
+            e.preventDefault(); // 防止頁面跳轉
+            
+            var name = document.getElementById('inputName').value;
+            // 確保有這個人才能送出 (簡單檢核)
+            var found = allData.find(item => item.name === name);
+            if (!found) {
+                alert("請輸入正確的人員姓名 (需在清單內)");
+                return;
+            }
+
+            var btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "提交中...";
+
+            // 準備要傳送的資料
+            var payload = {
+                name: name,
+                extension: document.getElementById('inputExt').value,
+                role: document.getElementById('inputRole').value,
+                note: document.getElementById('inputNote').value
+            };
+
+            // 使用 fetch POST 傳送，這裡用 text/plain 避免 CORS 預檢請求問題
+            fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                mode: 'no-cors' // Google Apps Script 跨域傳輸的特性
+            })
+            .then(() => {
+                // 因 mode: no-cors，無法讀取回傳值，預設為成功
+                alert("資料已提交！");
+                document.getElementById('dataForm').reset();
+                document.getElementById('autoSection').value = "";
+                document.getElementById('autoTitle').value = "";
+                btn.disabled = false;
+                btn.innerText = "提交資料";
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                alert("提交失敗，請稍後再試。");
+                btn.disabled = false;
+                btn.innerText = "提交資料";
+            });
+        }
+    </script>
+</body>
+</html>
