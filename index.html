@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>人員資料填報系統</title>
+    <title>人員資料填報表單</title>
     <style>
         body { 
             font-family: "Microsoft JhengHei", sans-serif; 
@@ -16,10 +16,8 @@
             touch-action: pan-x pan-y; 
         }
 
-        /* [修改] 減少 padding-top (原為 2rem 改為 1.5rem)，讓頂部不要空太多 */
         .container { background: white; padding: 1.5rem 2rem 2rem 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; position: relative; }
         
-        /* [修改] 標題與按鈕的距離縮小 */
         h2 { text-align: center; color: #333; margin-top: 5px; margin-bottom: 10px; } 
         
         .form-group { margin-bottom: 15px; }
@@ -28,14 +26,12 @@
         input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; background-color: white; }
         input:focus, select:focus { border-color: #4CAF50; outline: none; }
         
-        /* 按鈕樣式 */
         .btn-primary { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .btn-primary:hover { background-color: #45a049; }
         
         .btn-secondary { width: 100%; padding: 10px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .btn-secondary:hover { background-color: #5a6268; }
 
-        /* [修改] 查詢按鈕：減少下方的 margin，讓它跟標題近一點 */
         .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 10px; }
         .btn-info:hover { background-color: #138496; }
 
@@ -52,12 +48,12 @@
 <body>
 
     <div class="container" id="loginSection">
-        <h2>系統登入</h2>
+        <h2>進入表單</h2>
         <div class="form-group">
-            <label>請輸入存取密碼</label>
+            <label>請輸入表單密碼</label>
             <input type="password" id="passwordInput" placeholder="請輸入密碼">
         </div>
-        <button class="btn-primary" onclick="checkPassword()">進入表單</button>
+        <button class="btn-primary" onclick="checkPassword()">送出</button>
         <p id="loginMsg" style="color:red; text-align:center; margin-top:10px;"></p>
     </div>
 
@@ -67,35 +63,35 @@
 
         <h2>115年新股別人員資料</h2>
         
-        <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom: 10px;">請選擇姓名更新資料</p>
+        <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom: 10px;">1.選擇姓名將自動帶入新股別<br>2.輸入新股別所坐的位置分機<br>3.選擇所屬股別助理案管系統掛名</p>
         
         <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
 
         <form id="dataForm" onsubmit="submitForm(event)">
             <div class="form-group">
-                <label>1. 姓名 (請選擇)</label>
+                <label>1. 姓名</label>
                 <select id="inputName" onchange="autoFillInfo()" required>
                     <option value="" disabled selected>載入中...</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>股別 (自動帶出)</label>
+                <label>股別</label>
                 <input type="text" id="autoSection" class="readonly-field" readonly>
             </div>
             <div class="form-group">
-                <label>職稱 (自動帶出)</label>
+                <label>職稱</label>
                 <input type="text" id="autoTitle" class="readonly-field" readonly>
             </div>
 
             <div class="form-group">
-                <label>2. 分機 (請輸入4位數字)</label>
-                <input type="text" id="inputExt" pattern="\d{4}" maxlength="4" placeholder="例如: 1234" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <label>2. 分機</label>
+                <input type="text" id="inputExt" pattern="\d{4}" maxlength="4" placeholder="例如: 3216" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             </div>
 
             <div class="form-group">
-                <label>3. 職務選擇</label>
-                <select id="inputRole" required>
+                <label>3. 助理案管系統掛名人員</label>
+                <select id="inputRole" onchange="checkRolePermission(this)" required>
                     <option value="" disabled selected>請選擇...</option>
                     <option value="書記官">書記官</option>
                     <option value="執行員">執行員</option>
@@ -146,9 +142,11 @@
         // ==========================================
         // ★★★ 請確認網址已是最新部署的版本 ★★★
         // ==========================================
-        var scriptURL = "https://script.google.com/macros/s/AKfycbwYSPyDZViJH2mf3zthH3CpMFZwIsPSJwXWKCdbGA_Jnf61snsXEeuF00nfMzk4iLsUlw/exec"; 
+        var scriptURL = "https://script.google.com/macros/s/AKfycbzgnBhaGi7e5dZhvI6nivHJGu7RMYJJJGIehkAhlZc7pHhZ-x4c5DtpZqPN9gThCAHYgg/exec"; 
         
         var allData = []; 
+        var currentUserPermission = ''; // [新增] 用來儲存當前使用者的權限註記
+        var isProxyMode = false;        // [新增] 用來標記是否為代回覆
 
         function checkPassword() {
             var pwd = document.getElementById('passwordInput').value;
@@ -195,30 +193,60 @@
                 });
         }
 
-        // [修改] 偵測邏輯更新
         function autoFillInfo() {
             var inputName = document.getElementById('inputName').value;
             var found = allData.find(item => item.name === inputName);
 
+            // 當切換使用者時，重置所有狀態
+            isProxyMode = false;
+            document.getElementById('inputRole').value = ""; // 清空選擇
+
             if (found) {
                 document.getElementById('autoSection').value = found.section;
                 document.getElementById('autoTitle').value = found.title;
+                
+                // [新增] 儲存當前使用者的權限 ('v' 或空)
+                currentUserPermission = found.permission;
 
-                // 偵測是否已填寫
+                // 偵測是否已填寫 (保留您原本的邏輯)
                 if (found.extension && found.role) {
-                    // [修改] 移除姓名顯示，改為通用提示
                     var check = confirm("提示：系統偵測到此人員已經回覆過表單。\n\n是否要重新回覆或更新資料？\n\n按「確定」：留在本頁更新資料\n按「取消」：回到首頁");
-                    
-                    if (check) {
-                        // 按下確定，留在此頁
-                    } else {
-                        // 按下取消，重新載入
+                    if (!check) {
                         location.reload();
                     }
                 }
             } else {
                 document.getElementById('autoSection').value = "";
                 document.getElementById('autoTitle').value = "";
+                currentUserPermission = '';
+            }
+        }
+
+        // [新增] 檢查職務選擇權限
+        function checkRolePermission(selectElement) {
+            // 如果還沒選名字，先清空並警告
+            if (!document.getElementById('inputName').value) {
+                alert("請先選擇姓名！");
+                selectElement.value = "";
+                return;
+            }
+
+            // 如果權限標記是 'v'，允許直接選擇
+            if (currentUserPermission === 'v') {
+                isProxyMode = false;
+                return; 
+            }
+
+            // 如果沒有 'v'，彈出代回覆詢問
+            var wantToProxy = confirm("僅限任股別書記官選擇，但並詢問您要代回覆嗎？\n\n系統將幫您另外通知工程師。\n\n按「確定」：開放選擇 (將標記為代回覆)\n按「取消」：回上一頁");
+
+            if (wantToProxy) {
+                // 按下確定，標記為代回覆，允許選擇
+                isProxyMode = true;
+            } else {
+                // 按下取消，清空選擇 (回到未選狀態)
+                selectElement.value = "";
+                isProxyMode = false;
             }
         }
 
@@ -236,11 +264,13 @@
             btn.disabled = true;
             btn.innerText = "提交中...";
 
+            // 準備 payload，加入 isProxy 標記
             var payload = {
                 name: name,
                 extension: document.getElementById('inputExt').value,
                 role: document.getElementById('inputRole').value,
-                note: document.getElementById('inputNote').value
+                note: document.getElementById('inputNote').value,
+                isProxy: isProxyMode // 傳送是否為代回覆
             };
 
             fetch(scriptURL, {
