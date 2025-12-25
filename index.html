@@ -325,6 +325,11 @@
                 return;
             }
 
+            if (document.getElementById('inputExt').value.length !== 4) {
+                alert("分機號碼格式錯誤，請輸入完整的 4 位數字！");
+                return;
+            }
+
             var btn = document.getElementById('submitBtn');
             btn.disabled = true;
             btn.innerText = "提交中...";
@@ -441,5 +446,6 @@
     </script>
 </body>
 </html>
+
 
 
