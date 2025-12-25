@@ -16,9 +16,19 @@
             touch-action: pan-x pan-y; 
         }
 
-        .container { background: white; padding: 1.5rem 2rem 2rem 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; position: relative; }
+        /* [修改 1] 容器上方 padding 改為 15px，以配合按鈕下方的距離 */
+        .container { 
+            background: white; 
+            padding: 15px 2rem 2rem 2rem; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 500px; 
+            position: relative; 
+        }
         
-        h2 { text-align: center; color: #333; margin-top: 5px; margin-bottom: 10px; } 
+        /* [修改 2] 標題上下 margin 都歸零，讓版面更緊湊 */
+        h2 { text-align: center; color: #333; margin-top: 0; margin-bottom: 0; } 
         
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
@@ -26,13 +36,14 @@
         input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; background-color: white; }
         input:focus, select:focus { border-color: #4CAF50; outline: none; }
         
-        .btn-primary { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 5px; }
+        .btn-primary { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .btn-primary:hover { background-color: #45a049; }
         
         .btn-secondary { width: 100%; padding: 10px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .btn-secondary:hover { background-color: #5a6268; }
 
-        .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 2px; }
+        /* [修改 3] 按鈕下方 margin 設為 15px，與容器上方 padding 一樣高 */
+        .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 15px; }
         .btn-info:hover { background-color: #138496; }
 
         button:disabled { background-color: #ccc; cursor: not-allowed; }
@@ -48,7 +59,7 @@
 <body>
 
     <div class="container" id="loginSection">
-        <h2>進入表單</h2>
+        <h2 style="margin-top: 10px;">進入表單</h2>
         <div class="form-group">
             <label>請輸入表單密碼</label>
             <input type="password" id="passwordInput" placeholder="請輸入密碼">
@@ -63,9 +74,13 @@
 
         <h2>115年新股別人員資料</h2>
         
-        <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom: 10px; margin-top: 0px;">1.選擇姓名將自動帶入新股別<br>2.輸入新股別所坐的位置分機<br>3.選擇所屬股別助理案管系統掛名</p>
+        <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom: 5px; margin-top: 0; line-height: 1.5;">
+            1.選擇姓名將自動帶入新股別<br>
+            2.輸入新股別所坐的位置分機<br>
+            3.選擇所屬股別助理案管系統掛名
+        </p>
         
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
 
         <form id="dataForm" onsubmit="submitForm(event)">
             <div class="form-group">
@@ -108,7 +123,7 @@
     </div>
 
     <div class="container hidden" id="querySection">
-        <h2>查詢回覆狀態</h2>
+        <h2 style="margin-top: 10px;">查詢回覆狀態</h2>
         <p style="text-align:center; color:#666;">請選擇您的姓名進行查詢</p>
         
         <div class="form-group">
@@ -145,8 +160,8 @@
         var scriptURL = "https://script.google.com/macros/s/AKfycbzgnBhaGi7e5dZhvI6nivHJGu7RMYJJJGIehkAhlZc7pHhZ-x4c5DtpZqPN9gThCAHYgg/exec"; 
         
         var allData = []; 
-        var currentUserPermission = ''; // [新增] 用來儲存當前使用者的權限註記
-        var isProxyMode = false;        // [新增] 用來標記是否為代回覆
+        var currentUserPermission = ''; 
+        var isProxyMode = false;        
 
         function checkPassword() {
             var pwd = document.getElementById('passwordInput').value;
@@ -197,18 +212,15 @@
             var inputName = document.getElementById('inputName').value;
             var found = allData.find(item => item.name === inputName);
 
-            // 當切換使用者時，重置所有狀態
             isProxyMode = false;
-            document.getElementById('inputRole').value = ""; // 清空選擇
+            document.getElementById('inputRole').value = ""; 
 
             if (found) {
                 document.getElementById('autoSection').value = found.section;
                 document.getElementById('autoTitle').value = found.title;
                 
-                // [新增] 儲存當前使用者的權限 ('v' 或空)
                 currentUserPermission = found.permission;
 
-                // 偵測是否已填寫 (保留您原本的邏輯)
                 if (found.extension && found.role) {
                     var check = confirm("提示：系統偵測到此人員已經回覆過表單。\n\n是否要重新回覆或更新資料？\n\n按「確定」：留在本頁更新資料\n按「取消」：回到首頁");
                     if (!check) {
@@ -222,29 +234,23 @@
             }
         }
 
-        // [新增] 檢查職務選擇權限
         function checkRolePermission(selectElement) {
-            // 如果還沒選名字，先清空並警告
             if (!document.getElementById('inputName').value) {
                 alert("請先選擇姓名！");
                 selectElement.value = "";
                 return;
             }
 
-            // 如果權限標記是 'v'，允許直接選擇
             if (currentUserPermission === 'v') {
                 isProxyMode = false;
                 return; 
             }
 
-            // 如果沒有 'v'，彈出代回覆詢問
             var wantToProxy = confirm("僅限任股別書記官選擇，但並詢問您要代回覆嗎？\n\n系統將幫您另外通知工程師。\n\n按「確定」：開放選擇 (將標記為代回覆)\n按「取消」：回上一頁");
 
             if (wantToProxy) {
-                // 按下確定，標記為代回覆，允許選擇
                 isProxyMode = true;
             } else {
-                // 按下取消，清空選擇 (回到未選狀態)
                 selectElement.value = "";
                 isProxyMode = false;
             }
@@ -264,13 +270,12 @@
             btn.disabled = true;
             btn.innerText = "提交中...";
 
-            // 準備 payload，加入 isProxy 標記
             var payload = {
                 name: name,
                 extension: document.getElementById('inputExt').value,
                 role: document.getElementById('inputRole').value,
                 note: document.getElementById('inputNote').value,
-                isProxy: isProxyMode // 傳送是否為代回覆
+                isProxy: isProxyMode 
             };
 
             fetch(scriptURL, {
@@ -321,7 +326,3 @@
     </script>
 </body>
 </html>
-
-
-
-
