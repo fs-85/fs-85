@@ -16,10 +16,10 @@
             touch-action: pan-x pan-y; 
         }
 
-        /* [修改 1] 容器上方 padding 改為 15px，以配合按鈕下方的距離 */
+        /* [修改 1] 容器上方 padding 加大至 20px，讓按鈕上方不那麼壓迫 */
         .container { 
             background: white; 
-            padding: 15px 2rem 2rem 2rem; 
+            padding: 20px 2rem 2rem 2rem; 
             border-radius: 8px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
             width: 100%; 
@@ -27,10 +27,10 @@
             position: relative; 
         }
         
-        /* [修改 2] 標題上下 margin 都歸零，讓版面更緊湊 */
         h2 { text-align: center; color: #333; margin-top: 0; margin-bottom: 0; } 
         
-        .form-group { margin-bottom: 15px; }
+        /* [修改 2] 縮小每個題目的間距 (原 15px -> 12px) */
+        .form-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
         
         input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; background-color: white; }
@@ -42,8 +42,8 @@
         .btn-secondary { width: 100%; padding: 10px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .btn-secondary:hover { background-color: #5a6268; }
 
-        /* [修改 3] 按鈕下方 margin 設為 15px，與容器上方 padding 一樣高 */
-        .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 15px; }
+        /* [修改 3] 按鈕下方 margin 縮小至 10px，抵銷下方文字的行高視覺差 */
+        .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 10px; }
         .btn-info:hover { background-color: #138496; }
 
         button:disabled { background-color: #ccc; cursor: not-allowed; }
@@ -74,13 +74,13 @@
 
         <h2>115年新股別人員資料</h2>
         
-        <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom: 5px; margin-top: 0; line-height: 1.5;">
+        <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom: 2px; margin-top: 0; line-height: 1.5;">
             1.選擇姓名將自動帶入新股別<br>
             2.輸入新股別所坐的位置分機<br>
             3.選擇所屬股別助理案管系統掛名
         </p>
         
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
 
         <form id="dataForm" onsubmit="submitForm(event)">
             <div class="form-group">
