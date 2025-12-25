@@ -325,9 +325,8 @@
                 return;
             }
 
-            var extVal = document.getElementById('inputExt').value;
-            if (extVal.length < 4) {
-                alert("分機請輸入完整 4 碼數字！");
+            if (document.getElementById('inputExt').value.length !== 4) {
+                alert("不足4碼，需輸入4碼！");
                 return;
             }
 
@@ -447,6 +446,7 @@
     </script>
 </body>
 </html>
+
 
 
 
