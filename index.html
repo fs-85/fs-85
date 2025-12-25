@@ -16,7 +16,6 @@
             touch-action: pan-x pan-y; 
         }
 
-        /* [修改 1] 容器上方 padding 加大至 20px，讓按鈕上方不那麼壓迫 */
         .container { 
             background: white; 
             padding: 20px 2rem 2rem 2rem; 
@@ -29,12 +28,13 @@
         
         h2 { text-align: center; color: #333; margin-top: 0; margin-bottom: 0; } 
         
-        /* [修改 2] 縮小每個題目的間距 (原 15px -> 12px) */
         .form-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
         
         input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; background-color: white; }
         input:focus, select:focus { border-color: #4CAF50; outline: none; }
+        /* 鎖定時的樣式 */
+        input:disabled, select:disabled { background-color: #f5f5f5; color: #888; cursor: not-allowed; }
         
         .btn-primary { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .btn-primary:hover { background-color: #45a049; }
@@ -42,7 +42,6 @@
         .btn-secondary { width: 100%; padding: 10px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .btn-secondary:hover { background-color: #5a6268; }
 
-        /* [修改 3] 按鈕下方 margin 縮小至 10px，抵銷下方文字的行高視覺差 */
         .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 10px; }
         .btn-info:hover { background-color: #138496; }
 
@@ -106,10 +105,8 @@
 
             <div class="form-group">
                 <label>3. 助理案管系統掛名人員</label>
-                <select id="inputRole" onchange="checkRolePermission(this)" required>
-                    <option value="" disabled selected>請選擇...</option>
-                    <option value="書記官">書記官</option>
-                    <option value="執行員">執行員</option>
+                <select id="inputRole">
+                    <option value="" disabled selected>請先選擇姓名...</option>
                 </select>
             </div>
 
@@ -160,8 +157,6 @@
         var scriptURL = "https://script.google.com/macros/s/AKfycbzgnBhaGi7e5dZhvI6nivHJGu7RMYJJJGIehkAhlZc7pHhZ-x4c5DtpZqPN9gThCAHYgg/exec"; 
         
         var allData = []; 
-        var currentUserPermission = ''; 
-        var isProxyMode = false;        
 
         function checkPassword() {
             var pwd = document.getElementById('passwordInput').value;
@@ -208,19 +203,50 @@
                 });
         }
 
+        // [修改] 偵測姓名並動態控制第3點
         function autoFillInfo() {
             var inputName = document.getElementById('inputName').value;
             var found = allData.find(item => item.name === inputName);
 
-            isProxyMode = false;
-            document.getElementById('inputRole').value = ""; 
+            // 取得第3點的下拉選單
+            var roleSelect = document.getElementById('inputRole');
+            roleSelect.innerHTML = ""; // 先清空所有選項
 
             if (found) {
                 document.getElementById('autoSection').value = found.section;
                 document.getElementById('autoTitle').value = found.title;
                 
-                currentUserPermission = found.permission;
+                // 判斷 H列權限 ('v')
+                if (found.permission === 'v') {
+                    // 有權限：加入選項並啟用
+                    roleSelect.disabled = false;
+                    roleSelect.required = true; // 設為必填
+                    
+                    // 加入預設選項
+                    var defaultOpt = document.createElement('option');
+                    defaultOpt.value = "";
+                    defaultOpt.text = "請選擇...";
+                    defaultOpt.disabled = true;
+                    defaultOpt.selected = true;
+                    roleSelect.appendChild(defaultOpt);
 
+                    // 加入選項
+                    var opt1 = document.createElement('option'); opt1.value = "書記官"; opt1.text = "書記官"; roleSelect.appendChild(opt1);
+                    var opt2 = document.createElement('option'); opt2.value = "執行員"; opt2.text = "執行員"; roleSelect.appendChild(opt2);
+
+                } else {
+                    // 無權限：顯示不需填寫並鎖定
+                    roleSelect.disabled = true;
+                    roleSelect.required = false; // 不必填
+                    
+                    var optNo = document.createElement('option');
+                    optNo.value = "";
+                    optNo.text = "不需填寫 (無權限)";
+                    optNo.selected = true;
+                    roleSelect.appendChild(optNo);
+                }
+
+                // 偵測是否已填寫 (彈窗提示)
                 if (found.extension && found.role) {
                     var check = confirm("提示：系統偵測到此人員已經回覆過表單。\n\n是否要重新回覆或更新資料？\n\n按「確定」：留在本頁更新資料\n按「取消」：回到首頁");
                     if (!check) {
@@ -228,31 +254,14 @@
                     }
                 }
             } else {
+                // 如果找不到人或未選擇
                 document.getElementById('autoSection').value = "";
                 document.getElementById('autoTitle').value = "";
-                currentUserPermission = '';
-            }
-        }
-
-        function checkRolePermission(selectElement) {
-            if (!document.getElementById('inputName').value) {
-                alert("請先選擇姓名！");
-                selectElement.value = "";
-                return;
-            }
-
-            if (currentUserPermission === 'v') {
-                isProxyMode = false;
-                return; 
-            }
-
-            var wantToProxy = confirm("僅限任股別書記官選擇，但並詢問您要代回覆嗎？\n\n系統將幫您另外通知工程師。\n\n按「確定」：開放選擇 (將標記為代回覆)\n按「取消」：回上一頁");
-
-            if (wantToProxy) {
-                isProxyMode = true;
-            } else {
-                selectElement.value = "";
-                isProxyMode = false;
+                
+                roleSelect.disabled = true;
+                var optDef = document.createElement('option');
+                optDef.text = "請先選擇姓名...";
+                roleSelect.appendChild(optDef);
             }
         }
 
@@ -273,9 +282,9 @@
             var payload = {
                 name: name,
                 extension: document.getElementById('inputExt').value,
-                role: document.getElementById('inputRole').value,
+                role: document.getElementById('inputRole').value, // 如果是被鎖定的，這裡會是空值
                 note: document.getElementById('inputNote').value,
-                isProxy: isProxyMode 
+                isProxy: false // 既然移除了代回覆功能，固定為 false
             };
 
             fetch(scriptURL, {
@@ -326,4 +335,3 @@
     </script>
 </body>
 </html>
-
