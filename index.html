@@ -43,6 +43,9 @@
         .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 10px; }
         .btn-info:hover { background-color: #138496; }
 
+        .btn-warning { width: 100%; padding: 10px; background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-warning:hover { background-color: #e68900; }
+
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         
         .readonly-field { background-color: #e9ecef; color: #495057; }
@@ -53,6 +56,13 @@
         .closed-msg { text-align: center; color: #dc3545; font-size: 2em; margin: 40px 0; font-weight: bold; }
         
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; }
+
+        .status-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .status-table th, .status-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .status-table th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
+        .status-table td.center { text-align: center; }
+        .check-mark { color: #28a745; font-weight: bold; font-size: 1.2em; }
+        .scrollable-list { max-height: 300px; overflow-y: auto; margin-top: 10px; border: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -125,14 +135,30 @@
     <div class="container hidden" id="querySection">
         <h2 style="margin-top: 10px;">查詢回覆狀態</h2>
         <p style="text-align:center; color:#666;">請選擇您的姓名進行查詢</p>
+        
         <div class="form-group">
             <label>請選擇姓名</label>
             <select id="queryNameSelect">
                 <option value="" disabled selected>請選擇...</option>
             </select>
         </div>
+        
         <button class="btn-primary" onclick="checkStatus()">查詢</button>
+        <button class="btn-warning" onclick="showAllStatus()">查詢全部</button>
         <button class="btn-secondary" onclick="backToForm()">返回填報頁面</button>
+
+        <div id="allStatusContainer" class="hidden scrollable-list">
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>回覆狀態</th>
+                    </tr>
+                </thead>
+                <tbody id="statusTableBody">
+                    </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="container hidden" id="thankYouSection">
@@ -278,7 +304,7 @@
             }
 
             if (selectElement.value !== "") {
-                var wantToProxy = confirm("限任股別書記官選擇，您要代回覆嗎？系統將幫您通知資訊工程師。\n\n按「確定」：開放選擇\n按「取消」：清空選擇");
+                var wantToProxy = confirm("限任股別書記官選擇，您要代為回覆嗎？系統將幫您通知資訊工程師。\n\n按「確定」：開放選擇\n按「取消」：清空選擇");
 
                 if (wantToProxy) {
                     isProxyMode = true;
@@ -333,6 +359,7 @@
         function goToQueryPage() {
             document.getElementById('formSection').classList.add('hidden');
             document.getElementById('querySection').classList.remove('hidden');
+            document.getElementById('allStatusContainer').classList.add('hidden');
         }
 
         function backToForm() {
@@ -346,6 +373,8 @@
                 alert("請先選擇姓名！");
                 return;
             }
+
+            document.getElementById('allStatusContainer').classList.add('hidden');
 
             var found = allData.find(item => item.name === name);
 
@@ -372,19 +401,42 @@
                 alert("找不到該人員資料。");
             }
         }
+
+        function showAllStatus() {
+            var tbody = document.getElementById('statusTableBody');
+            tbody.innerHTML = "";
+
+            allData.forEach(function(item) {
+                var isReplied = false;
+                
+                if (item.permission === 'v') {
+                    if (item.extension && item.role) {
+                        isReplied = true;
+                    }
+                } else {
+                    if (item.extension) {
+                        isReplied = true;
+                    }
+                }
+
+                var tr = document.createElement('tr');
+                
+                var tdName = document.createElement('td');
+                tdName.textContent = item.name;
+                tr.appendChild(tdName);
+
+                var tdStatus = document.createElement('td');
+                tdStatus.className = "center";
+                if (isReplied) {
+                    tdStatus.innerHTML = '<span class="check-mark">✔</span>';
+                }
+                tr.appendChild(tdStatus);
+
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('allStatusContainer').classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
