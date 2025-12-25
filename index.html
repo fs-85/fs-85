@@ -5,13 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>人員資料填報系統</title>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        /* [修正 1] 加入 touch-action 禁止瀏覽器預設的縮放手勢，但保留捲動功能 */
+        body { 
+            font-family: "Microsoft JhengHei", sans-serif; 
+            background-color: #f0f2f5; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0;
+            touch-action: pan-x pan-y; 
+        }
+
         .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
         h2 { text-align: center; color: #333; margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
         
-        /* [修正重點 2] 設定 font-size: 16px 防止 iPhone 點擊輸入框時自動放大 */
+        /* 字體維持 16px 防止 iOS 輸入時自動放大 */
         input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
         
         input:focus { border-color: #4CAF50; outline: none; }
@@ -19,13 +30,11 @@
         button:hover { background-color: #45a049; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         
-        /* 唯讀欄位樣式 */
         .readonly-field { background-color: #e9ecef; color: #495057; }
         
-        /* 隱藏區塊 - 使用 !important 確保權重 */
+        /* 強制隱藏 */
         .hidden { display: none !important; }
         
-        /* 載入中遮罩 */
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; }
     </style>
 </head>
@@ -90,18 +99,31 @@
 
     <script>
         // ==========================================
-        // 請確認這個網址是你最新部署 (New Deployment) 產生的網址
+        // [修正 2] 強制禁止 iOS Safari 的雙指縮放行為
         // ==========================================
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+
+        // 防止雙擊放大 (除了 input 以外的地方)
+        var lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            var now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        // ==========================================
+
         var scriptURL = "https://script.google.com/macros/s/AKfycbwE8BYX8SMcqu_TtMNMjzIUdFZjkJ78Eh0MbuRf42SJUVVRRv5aWKri63gK12xqsKv3nw/exec"; 
         
-        var allData = []; // 儲存從試算表抓下來的人員名單
+        var allData = []; 
 
-        // 1. 檢查密碼
         function checkPassword() {
             var pwd = document.getElementById('passwordInput').value;
             if (pwd === 'chy') {
                 document.getElementById('loading').classList.remove('hidden');
-                // 密碼正確後，先去抓取試算表的人員名單
                 fetchData();
             } else {
                 document.getElementById('loginMsg').innerText = "密碼錯誤";
@@ -109,13 +131,11 @@
             }
         }
 
-        // 2. 從 Google Sheet 抓取人員名單 (doGet)
         function fetchData() {
             fetch(scriptURL)
                 .then(response => response.json())
                 .then(data => {
                     allData = data;
-                    // 建立 datalist 讓使用者打字有建議名單
                     var list = document.getElementById('nameList');
                     list.innerHTML = "";
                     data.forEach(item => {
@@ -124,7 +144,6 @@
                         list.appendChild(option);
                     });
 
-                    // 切換顯示區塊
                     document.getElementById('loading').classList.add('hidden');
                     document.getElementById('loginSection').classList.add('hidden');
                     document.getElementById('formSection').classList.remove('hidden');
@@ -135,10 +154,8 @@
                 });
         }
 
-        // 3. 自動帶出股別與職稱
         function autoFillInfo() {
             var inputName = document.getElementById('inputName').value;
-            // 在下載的資料中尋找這個名字
             var found = allData.find(item => item.name === inputName);
 
             if (found) {
@@ -150,12 +167,10 @@
             }
         }
 
-        // 4. 提交表單 (doPost)
         function submitForm(e) {
-            e.preventDefault(); // 防止頁面跳轉
+            e.preventDefault(); 
             
             var name = document.getElementById('inputName').value;
-            // 確保有這個人才能送出 (簡單檢核)
             var found = allData.find(item => item.name === name);
             if (!found) {
                 alert("請輸入正確的人員姓名 (需在清單內)");
@@ -166,7 +181,6 @@
             btn.disabled = true;
             btn.innerText = "提交中...";
 
-            // 準備要傳送的資料
             var payload = {
                 name: name,
                 extension: document.getElementById('inputExt').value,
@@ -174,14 +188,12 @@
                 note: document.getElementById('inputNote').value
             };
 
-            // 使用 fetch POST 傳送，這裡用 text/plain 避免 CORS 預檢請求問題
             fetch(scriptURL, {
                 method: 'POST',
                 body: JSON.stringify(payload),
-                mode: 'no-cors' // Google Apps Script 跨域傳輸的特性
+                mode: 'no-cors' 
             })
             .then(() => {
-                // 因 mode: no-cors，無法讀取回傳值，預設為成功
                 alert("資料已提交！");
                 document.getElementById('dataForm').reset();
                 document.getElementById('autoSection').value = "";
