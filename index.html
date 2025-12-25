@@ -17,7 +17,7 @@
         }
 
         .container { 
-            background: white;
+            background: white; 
             padding: 20px 2rem 2rem 2rem; 
             border-radius: 8px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
@@ -62,6 +62,11 @@
             <input type="password" id="passwordInput" placeholder="請輸入密碼">
         </div>
         <button class="btn-primary" onclick="checkPassword()">送出</button>
+        
+        <p style="text-align:center; color:#888; font-size: 0.9em; margin-top: 10px; margin-bottom: 0;">
+            表單截止時間12/27 下午17:00
+        </p>
+
         <p id="loginMsg" style="color:red; text-align:center; margin-top:10px;"></p>
     </div>
 
@@ -74,7 +79,7 @@
         <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom: 2px; margin-top: 0; line-height: 1.5;">
             1.選擇姓名將自動帶入新股別<br>
             2.輸入新股別所坐的位置分機<br>
-            3.選擇所屬助理案管帳號掛名<br>
+            3.選擇所屬助理案管系統掛名<br>
             ⚠️未相關人員，勿回覆表單⚠️
         </p>
         
@@ -103,7 +108,7 @@
             </div>
 
             <div class="form-group">
-                <label>3. 助理案管系統掛名人員</label>
+                <label>3. 助理案管系統帳號掛名</label>
                 <select id="inputRole" onchange="checkRolePermission(this)">
                     <option value="" disabled selected>請選擇...</option>
                     <option value="書記官">書記官</option>
@@ -158,7 +163,15 @@
         var currentUserPermission = ''; 
         var isProxyMode = false;        
 
+        var DEADLINE_DATE = new Date("2025-12-26T02:42:00");
+
         function checkPassword() {
+            var now = new Date();
+            if (now > DEADLINE_DATE) {
+                document.getElementById('loginMsg').innerText = "表單已截止！";
+                return;
+            }
+
             var pwd = document.getElementById('passwordInput').value;
             if (pwd === 'chy') {
                 document.getElementById('loading').classList.remove('hidden');
@@ -359,9 +372,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
