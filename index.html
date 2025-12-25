@@ -325,8 +325,9 @@
                 return;
             }
 
-            if (document.getElementById('inputExt').value.length !== 4) {
-                alert("分機號碼格式錯誤，請輸入完整的 4 位數字！");
+            var extVal = document.getElementById('inputExt').value;
+            if (extVal.length < 4) {
+                alert("分機請輸入完整 4 碼數字！");
                 return;
             }
 
@@ -446,6 +447,7 @@
     </script>
 </body>
 </html>
+
 
 
 
