@@ -19,8 +19,8 @@
         /* 唯讀欄位樣式 */
         .readonly-field { background-color: #e9ecef; color: #495057; }
         
-        /* 隱藏區塊 */
-        .hidden { display: none; }
+        /* [修正重點] 加上 !important 強制隱藏，解決被 ID 權重覆蓋的問題 */
+        .hidden { display: none !important; }
         
         /* 載入中遮罩 */
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; }
@@ -87,7 +87,7 @@
 
     <script>
         // ==========================================
-        // 請將下方的網址替換成你的 GAS 網頁應用程式網址
+        // 請確認這個網址是你最新部署 (New Deployment) 產生的網址
         // ==========================================
         var scriptURL = "https://script.google.com/macros/s/AKfycbwE8BYX8SMcqu_TtMNMjzIUdFZjkJ78Eh0MbuRf42SJUVVRRv5aWKri63gK12xqsKv3nw/exec"; 
         
@@ -144,7 +144,6 @@
             } else {
                 document.getElementById('autoSection').value = "";
                 document.getElementById('autoTitle').value = "";
-                // 這裡可以選擇是否提示找不到人，或靜默
             }
         }
 
@@ -196,6 +195,4 @@
         }
     </script>
 </body>
-
 </html>
-
