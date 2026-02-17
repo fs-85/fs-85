@@ -33,7 +33,7 @@
 <body>
 
     <div class="container" id="loginSection">
-        <h2>115上半年書記官打字測驗預約表單</h2>
+        <h2>115上半年<br>書記官打字測驗預約表單</h2>
         <div class="form-group">
             <label>1. 表單密碼</label>
             <input type="password" id="passwordInput" placeholder="請輸入表單密碼">
@@ -61,7 +61,7 @@
 
     <div class="container hidden" id="formSection">
         <button class="btn-info" onclick="toggleSection('querySection')">🔍 查詢填報狀態</button>
-        <h2>115上半年書記官打字測驗預約表單</h2>
+        <h2>115上半年<br>書記官打字測驗預約表單</h2>
         <div class="hint">
             請確認您的資訊並選擇測驗時段<br>
             若需修改，請重新進入表單填寫再次提交資料
@@ -131,6 +131,9 @@
         var DEADLINE_DATE = new Date("2026-02-20T17:00:00");
 
         function hideMobileKeyboard() {
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
             var field = document.createElement('input');
             field.setAttribute('type', 'text');
             field.setAttribute('style', 'position:absolute; top: 0px; opacity: 0;');
@@ -139,6 +142,7 @@
             setTimeout(function() {
                 field.blur();
                 document.body.removeChild(field);
+                window.scrollTo(0, 0);
             }, 50);
         }
 
@@ -174,14 +178,15 @@
                     if (userData) {
                         setupForm();
                         if (userData.mark === "v") {
-                            var confirmRevisit = confirm("系統偵測到您已完成填報\n是否要重新填報並修改您的資料？");
-                            if (!confirmRevisit) {
-                                location.reload();
-                                return;
-                            }
-                        }
-                        showSection('formSection');
-                    } else {
+                            setTimeout(function(){
+                                var confirmRevisit = confirm("系統偵測到您已完成填報。\n是否要修改您的資料？");
+                                if (!confirmRevisit) {
+                                    location.reload();
+                                    return;
+                                }
+                                showSection('formSection');
+                            }, 200);
+                        } else {
                         document.getElementById('loginMsg').innerText = "電腦帳號或案管系統帳號錯誤";
                     }
                     document.getElementById('loading').classList.add('hidden');
