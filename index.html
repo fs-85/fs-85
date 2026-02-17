@@ -268,11 +268,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             var now = new Date();
             var rocYear = now.getFullYear() - 1911; 
-            var timestamp = rocYear + "/" + 
-                            String(now.getMonth() + 1).padStart(2, '0') + "/" + 
-                            String(now.getDate()).padStart(2, '0') + " " + 
-                            String(now.getHours()).padStart(2, '0') + ":" + 
-                            String(now.getMinutes()).padStart(2, '0');
+            var timestamp = rocYear + "/" +
+                String(now.getMonth() + 1).padStart(2, '0') + "/" + 
+                String(now.getDate()).padStart(2, '0') + " " + 
+                String(now.getHours()).padStart(2, '0') + ":" + 
+                String(now.getMinutes()).padStart(2, '0');
 
             var payload = {
                 name: userData.name,
