@@ -12,11 +12,11 @@
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; background-color: white; }
         input:focus, select:focus { border-color: #4CAF50; outline: none; }
-        .btn-primary { width: 100%; padding: 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-primary { width: 100%; padding: 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; -webkit-appearance: none; }
         .btn-primary:hover { background-color: #45a049; }
-        .btn-secondary { width: 100%; padding: 10px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 10px; }
-        .btn-warning { width: 100%; padding: 10px; background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-secondary { width: 100%; padding: 10px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; -webkit-appearance: none; }
+        .btn-info { width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 10px; -webkit-appearance: none; }
+        .btn-warning { width: 100%; padding: 10px; background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; -webkit-appearance: none; }
         .readonly-field { background-color: #e9ecef; color: #495057; }
         .hidden { display: none !important; }
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; }
@@ -127,6 +127,19 @@
         var userData = null;
         var DEADLINE_DATE = new Date("2026-02-20T17:00:00");
 
+        // 強制收起 iPhone 鍵盤的核心函式
+        function hideMobileKeyboard() {
+            var field = document.createElement('input');
+            field.setAttribute('type', 'text');
+            field.setAttribute('style', 'position:absolute; top: 0px; opacity: 0;');
+            document.body.appendChild(field);
+            field.focus();
+            setTimeout(function() {
+                field.blur();
+                document.body.removeChild(field);
+            }, 50);
+        }
+
         window.onload = function() {
             var now = new Date();
             if (now > DEADLINE_DATE) {
@@ -135,6 +148,7 @@
         };
 
         function checkAuth() {
+            hideMobileKeyboard(); // 按下登入也縮回鍵盤
             var pwd = document.getElementById('passwordInput').value;
             var ad = document.getElementById('adInput').value.trim();
             var caseId = document.getElementById('caseInput').value.trim();
@@ -157,8 +171,6 @@
 
                     if (userData) {
                         setupForm();
-                        
-                        // 開放重新填報邏輯
                         if (userData.mark === "v") {
                             var confirmRevisit = confirm("系統偵測到您已完成填報。\n是否要修改您的資料？");
                             if (!confirmRevisit) {
@@ -173,7 +185,7 @@
                     document.getElementById('loading').classList.add('hidden');
                 })
                 .catch(err => {
-                    alert("資料載入失敗，請檢查網路或 Script 設定。");
+                    alert("資料載入失敗，請檢查 Script 設定。");
                     document.getElementById('loading').classList.add('hidden');
                 });
         }
@@ -194,18 +206,18 @@
         function handleFormSubmit(e) {
             e.preventDefault();
             
-            // iPhone 鍵盤強制縮回
-            if (document.activeElement) {
-                document.activeElement.blur();
-            }
-            window.scrollTo(0, 0); 
+            // 執行強制收鍵盤
+            hideMobileKeyboard();
 
             var time = document.getElementById('timeSelect').value;
             if (!time) { alert("請選擇測驗時段！"); return; }
 
-            if (confirm("確認時段選擇是否正確？\n時段：" + time)) {
-                submitData(time);
-            }
+            // 延遲一點點跳出 confirm，確保鍵盤動作已經先被處理
+            setTimeout(function() {
+                if (confirm("確認時段選擇是否正確？\n時段：" + time)) {
+                    submitData(time);
+                }
+            }, 100);
         }
 
         function submitData(selectedTime) {
@@ -251,8 +263,7 @@
         }
 
         function toggleSection(id) { 
-            // 進入不同頁面時也強迫鍵盤縮回
-            if (document.activeElement) document.activeElement.blur();
+            hideMobileKeyboard();
             showSection(id); 
         }
 
