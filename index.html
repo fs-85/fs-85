@@ -179,7 +179,7 @@
                         setupForm();
                         if (userData.mark === "v") {
                             setTimeout(function(){
-                                var confirmRevisit = confirm("系統偵測到您已完成填報。\n是否要修改您的資料？");
+                                var confirmRevisit = confirm("系統偵測到您已完成填報\n是否要修改您的資料？");
                                 if (!confirmRevisit) {
                                     location.reload();
                                     return;
@@ -187,6 +187,9 @@
                                 showSection('formSection');
                             }, 200);
                         } else {
+                            showSection('formSection');
+                        } 
+                    } else {
                         document.getElementById('loginMsg').innerText = "電腦帳號或案管系統帳號錯誤";
                     }
                     document.getElementById('loading').classList.add('hidden');
