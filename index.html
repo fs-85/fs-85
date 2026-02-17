@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>115年書記官打字測驗填報</title>
-    <meta property="og:title" content="115年書記官打字測驗填報">
-<meta property="og:description" content="請輸入表單密碼以進入測驗報名系統">
-<meta property="og:type" content="website">
+    <title>115年上半年書記官打字測驗預約時段填報表單</title>
+    <meta property="og:title" content="115年上半年書記官打字測驗預約時段填報表單">
+    <meta property="og:description" content="請輸入表單密碼以進入填報表單">
+    <meta property="og:type" content="website">
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; touch-action: pan-x pan-y; }
         .container { background: white; padding: 20px 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; position: relative; }
@@ -39,12 +39,12 @@
             <input type="password" id="passwordInput" placeholder="請輸入表單密碼">
         </div>
         <div class="form-group">
-            <label>2. AD 帳號</label>
-            <input type="text" id="adInput" placeholder="例如: amigo12345678">
+            <label>2. 電腦帳號(開機帳號)</label>
+            <input type="text" id="adInput" placeholder="請輸入您的電腦帳號(開機帳號)">
         </div>
         <div class="form-group">
-            <label>3. 案管帳號 (6碼)</label>
-            <input type="text" id="caseInput" placeholder="例如: 130000">
+            <label>3. 案管系統帳號</label>
+            <input type="text" id="caseInput" placeholder="請輸入您的案管系統帳號">
         </div>
         <button class="btn-primary" onclick="checkAuth()">驗證並進入</button>
         <p class="hint" style="margin-top: 15px;">
@@ -56,15 +56,15 @@
 
     <div class="container hidden" id="closedSection">
         <h2 style="color: #dc3545;">表單已截止</h2>
-        <p style="text-align:center; color:#666;">目前的填報時間已結束。<br>如有疑義，請聯繫#3216 資訊工程師 顧芳碩。</p>
+        <p style="text-align:center; color:#666;">表單填報時間已結束<br>如有疑問，請聯繫資訊工程師#3216</p>
     </div>
 
     <div class="container hidden" id="formSection">
         <button class="btn-info" onclick="toggleSection('querySection')">🔍 查詢填報狀態</button>
-        <h2>115年書記官打字測驗</h2>
+        <h2>115年上半年書記官打字測驗</h2>
         <div class="hint">
             請確認您的資訊並選擇測驗時段。<br>
-            若需修改，重新提交將複寫舊資料。
+            若需修改，請重新選擇、填寫再次提交資料。
         </div>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
         
@@ -88,7 +88,7 @@
             </div>
             <div class="form-group">
                 <label>備註</label>
-                <input type="text" id="inputNote" placeholder="如有特殊需求請在此註記">
+                <input type="text" id="inputNote" placeholder="">
             </div>
             <button type="submit" id="submitBtn" class="btn-primary">確認並提交</button>
         </form>
@@ -175,7 +175,7 @@
                     if (userData) {
                         setupForm();
                         if (userData.mark === "v") {
-                            var confirmRevisit = confirm("系統偵測到您已完成填報。\n是否要修改您的資料？");
+                            var confirmRevisit = confirm("系統偵測到您已完成填報。\n是否要重新填報並修改您的資料？");
                             if (!confirmRevisit) {
                                 location.reload();
                                 return;
@@ -183,12 +183,12 @@
                         }
                         showSection('formSection');
                     } else {
-                        document.getElementById('loginMsg').innerText = "AD帳號或案管帳號不正確";
+                        document.getElementById('loginMsg').innerText = "電腦帳號或案管系統帳號錯誤";
                     }
                     document.getElementById('loading').classList.add('hidden');
                 })
                 .catch(err => {
-                    alert("資料載入失敗，請檢查 Script 設定。");
+                    alert("資料載入失敗，請聯絡資訊工程師#3216");
                     document.getElementById('loading').classList.add('hidden');
                 });
         }
@@ -252,7 +252,7 @@
                 showSection('thankYouSection');
                 document.getElementById('loading').classList.add('hidden');
             }).catch(() => {
-                alert("提交失敗，請洽資訊人員。");
+                alert("提交失敗，請聯絡資訊工程師#3216");
                 btn.disabled = false;
                 document.getElementById('loading').classList.add('hidden');
             });
