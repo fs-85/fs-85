@@ -136,31 +136,42 @@
         };
 
         function checkAuth() {
-            var pwd = document.getElementById('passwordInput').value;
-            var ad = document.getElementById('adInput').value.trim();
-            var caseId = document.getElementById('caseInput').value.trim();
+    var pwd = document.getElementById('passwordInput').value;
+    var ad = document.getElementById('adInput').value.trim();
+    var caseId = document.getElementById('caseInput').value.trim();
 
-            if (pwd !== 'SHU') {
-                alert("表單密碼錯誤"); return;
+    if (pwd !== 'SHU') {
+        alert("表單密碼錯誤");
+        return;
+    }
+
+    document.getElementById('loading').classList.remove('hidden');
+
+    // 修正點：GET 請求不應加 no-cors，否則 JSON 會變 null
+    fetch(scriptURL + "?action=getList")
+        .then(res => res.json())
+        .then(data => {
+            allData = data;
+            // 驗證邏輯
+            userData = data.find(item => 
+                item.ad.toLowerCase() === ad.toLowerCase() && 
+                String(item.caseId) === caseId
+            );
+
+            if (userData) {
+                setupForm();
+                showSection('formSection');
+            } else {
+                document.getElementById('loginMsg').innerText = "AD帳號或案管帳號不正確";
             }
-
-            document.getElementById('loading').classList.remove('hidden');
-
-            fetch(scriptURL + "?action=getList")
-                .then(res => res.json())
-                .then(data => {
-                    allData = data;
-                    userData = data.find(item => item.ad === ad && String(item.caseId) === caseId);
-
-                    if (userData) {
-                        setupForm();
-                        showSection('formSection');
-                    } else {
-                        document.getElementById('loginMsg').innerText = "AD帳號或案管帳號不正確";
-                    }
-                    document.getElementById('loading').classList.add('hidden');
-                });
-        }
+            document.getElementById('loading').classList.add('hidden');
+        })
+        .catch(err => {
+            console.error(err);
+            alert("資料載入失敗，請確認 Script 網址是否正確或已開啟所有人存取權限。");
+            document.getElementById('loading').classList.add('hidden');
+        });
+}
 
         function setupForm() {
             document.getElementById('autoName').value = userData.name;
