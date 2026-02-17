@@ -168,9 +168,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function checkAuth() {
             hideMobileKeyboard();
+
             var pwd = document.getElementById('passwordInput').value;
             var ad = document.getElementById('adInput').value.trim();
             var caseId = document.getElementById('caseInput').value.trim();
+
+            if (!pwd || !ad || !caseId) {
+                alert("請確實填寫所有欄位");
+                return;
+            }
 
             if (pwd !== 'chy') {
                 alert("表單密碼錯誤");
