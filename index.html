@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>115年上半年書記官打字測驗預約時段填報表單</title>
-    <meta property="og:title" content="115年上半年書記官打字測驗預約時段填報表單">
+    <title>彰化分署書記官打字測驗預約表單</title>
+    <meta property="og:title" content="彰化分署書記官打字測驗預約表單">
     <meta property="og:description" content="請輸入表單密碼以進入填報表單">
     <meta property="og:type" content="website">
     <style>
@@ -33,7 +33,7 @@
 <body>
 
     <div class="container" id="loginSection">
-        <h2>登入測驗報名系統</h2>
+        <h2>115上半年書記官打字測驗預約表單</h2>
         <div class="form-group">
             <label>1. 表單密碼</label>
             <input type="password" id="passwordInput" placeholder="請輸入表單密碼">
@@ -61,10 +61,10 @@
 
     <div class="container hidden" id="formSection">
         <button class="btn-info" onclick="toggleSection('querySection')">🔍 查詢填報狀態</button>
-        <h2>115年上半年書記官打字測驗</h2>
+        <h2>115上半年書記官打字測驗預約表單</h2>
         <div class="hint">
-            請確認您的資訊並選擇測驗時段。<br>
-            若需修改，請重新選擇、填寫再次提交資料。
+            請確認您的資訊並選擇測驗時段<br>
+            若需修改，請重新進入表單填寫再次提交資料
         </div>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
         
@@ -118,7 +118,7 @@
 
     <div class="container hidden" id="thankYouSection">
         <h2 style="color: #28a745;">提交成功！</h2>
-        <p style="text-align:center;">您選擇的時間與資料已記錄完成。</p>
+        <p style="text-align:center;">您選擇的時段已填報完成</p>
         <button class="btn-primary" onclick="location.reload()">回到首頁</button>
     </div>
 
@@ -130,7 +130,6 @@
         var userData = null;
         var DEADLINE_DATE = new Date("2026-02-20T17:00:00");
 
-        // 強制收起 iPhone 鍵盤的核心函式
         function hideMobileKeyboard() {
             var field = document.createElement('input');
             field.setAttribute('type', 'text');
@@ -151,12 +150,12 @@
         };
 
         function checkAuth() {
-            hideMobileKeyboard(); // 按下登入也縮回鍵盤
+            hideMobileKeyboard();
             var pwd = document.getElementById('passwordInput').value;
             var ad = document.getElementById('adInput').value.trim();
             var caseId = document.getElementById('caseInput').value.trim();
 
-            if (pwd !== 'SHU') {
+            if (pwd !== 'chy') {
                 alert("表單密碼錯誤");
                 return;
             }
@@ -175,7 +174,7 @@
                     if (userData) {
                         setupForm();
                         if (userData.mark === "v") {
-                            var confirmRevisit = confirm("系統偵測到您已完成填報。\n是否要重新填報並修改您的資料？");
+                            var confirmRevisit = confirm("系統偵測到您已完成填報\n是否要重新填報並修改您的資料？");
                             if (!confirmRevisit) {
                                 location.reload();
                                 return;
@@ -209,13 +208,11 @@
         function handleFormSubmit(e) {
             e.preventDefault();
             
-            // 執行強制收鍵盤
             hideMobileKeyboard();
 
             var time = document.getElementById('timeSelect').value;
             if (!time) { alert("請選擇測驗時段！"); return; }
 
-            // 延遲一點點跳出 confirm，確保鍵盤動作已經先被處理
             setTimeout(function() {
                 if (confirm("確認時段選擇是否正確？\n時段：" + time)) {
                     submitData(time);
