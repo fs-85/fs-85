@@ -188,6 +188,9 @@
 
         function handleFormSubmit(e) {
             e.preventDefault();
+            if (document.activeElement) {
+        document.activeElement.blur();
+    }
             var time = document.getElementById('timeSelect').value;
             if (!time) { alert("請選擇測驗時段！"); return; }
 
@@ -202,11 +205,12 @@
             document.getElementById('loading').classList.remove('hidden');
 
             var now = new Date();
-            var timestamp = (now.getFullYear() - 1911) + "/" + 
-                            String(now.getMonth() + 1).padStart(2, '0') + "/" + 
-                            String(now.getDate()).padStart(2, '0') + " " + 
-                            String(now.getHours()).padStart(2, '0') + ":" + 
-                            String(now.getMinutes()).padStart(2, '0');
+var rocYear = now.getFullYear() - 1911; // 取得民國年 (例如 115)
+var timestamp = rocYear + "/" + 
+                String(now.getMonth() + 1).padStart(2, '0') + "/" + 
+                String(now.getDate()).padStart(2, '0') + " " + 
+                String(now.getHours()).padStart(2, '0') + ":" + 
+                String(now.getMinutes()).padStart(2, '0');;
 
             var payload = {
                 name: userData.name,
