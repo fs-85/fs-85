@@ -125,10 +125,23 @@
     <div id="loading" class="hidden">處理中，請稍候...</div>
 
     <script>
-        var scriptURL = "https://script.google.com/macros/s/AKfycbwiEqGYrTyDLHOxUcGBXjkHXfYdT-NxMp7Tp5mPvgpnHvZ4rtEFmxTx_mS2mki4R8Ya/exec";
+        var scriptURL = "https://script.google.com/macros/s/AKfycbyoLsbsx_wu9SwWLDrkuByvgVGCde1_oplVOa7K9OZDltrlmwUNNtPBD7110eZa_wbL/exec";
         var allData = [];
         var userData = null;
         var DEADLINE_DATE = new Date("2026-02-20T17:00:00");
+
+document.addEventListener('DOMContentLoaded', function() {
+    const loginFields = ['passwordInput', 'adInput', 'caseInput'];
+    
+    loginFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', function() {
+                this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+            });
+        }
+    });
+});
 
         function hideMobileKeyboard() {
             if (document.activeElement) {
