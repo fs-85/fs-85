@@ -36,15 +36,15 @@
         <h2>115上半年<br>書記官打字測驗預約表單</h2>
         <div class="form-group">
             <label>1. 表單密碼</label>
-            <input type="password" id="passwordInput" placeholder="請輸入表單密碼" inputmode="email" autocomplete="off">
+            <input type="password" id="passwordInput" placeholder="請輸入表單密碼" autocomplete="off">
         </div>
         <div class="form-group">
             <label>2. 電腦帳號(開機帳號)</label>
-            <input type="url" id="adInput" placeholder="請輸入您的電腦帳號(開機帳號)" inputmode="email" autocomplete="off" style="ime-mode:disabled;">
+            <input type="password" id="adInput" placeholder="請輸入您的電腦帳號(開機帳號)" autocomplete="off">
         </div>
         <div class="form-group">
             <label>3. 案管系統帳號</label>
-            <input type="url" id="caseInput" placeholder="請輸入您的案管系統帳號" inputmode="email" autocomplete="off" style="ime-mode:disabled;">
+            <input type="password" id="caseInput" placeholder="請輸入您的案管系統帳號" autocomplete="off">
         </div>
         <button class="btn-primary" onclick="checkAuth()">驗證並進入</button>
         <p class="hint" style="margin-top: 15px;">
@@ -132,15 +132,25 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     const loginFields = ['passwordInput', 'adInput', 'caseInput'];
-    
-    loginFields.forEach(id => {
+    ['adInput', 'caseInput'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
+            el.addEventListener('focus', function() {
+                this.type = 'password'; 
+            });
             el.addEventListener('input', function() {
+                this.type = 'text'; 
                 this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
             });
         }
     });
+
+    const pwdEl = document.getElementById('passwordInput');
+    if (pwdEl) {
+        pwdEl.addEventListener('input', function() {
+            this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+        });
+    }
 });
 
         function hideMobileKeyboard() {
