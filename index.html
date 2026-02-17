@@ -36,15 +36,15 @@
         <h2>115上半年<br>書記官打字測驗預約表單</h2>
         <div class="form-group">
             <label>1. 表單密碼</label>
-            <input type="password" id="passwordInput" placeholder="請輸入表單密碼">
+            <input type="password" id="passwordInput" placeholder="請輸入表單密碼" inputmode="email" autocomplete="off">
         </div>
         <div class="form-group">
             <label>2. 電腦帳號(開機帳號)</label>
-            <input type="text" id="adInput" placeholder="請輸入您的電腦帳號(開機帳號)">
+            <input type="text" id="adInput" placeholder="請輸入您的電腦帳號(開機帳號)" inputmode="email" autocomplete="off" style="ime-mode:disabled;">
         </div>
         <div class="form-group">
             <label>3. 案管系統帳號</label>
-            <input type="text" id="caseInput" placeholder="請輸入您的案管系統帳號">
+            <input type="text" id="caseInput" placeholder="請輸入您的案管系統帳號" inputmode="email" autocomplete="off" style="ime-mode:disabled;">
         </div>
         <button class="btn-primary" onclick="checkAuth()">驗證並進入</button>
         <p class="hint" style="margin-top: 15px;">
@@ -125,7 +125,7 @@
     <div id="loading" class="hidden">處理中，請稍候...</div>
 
     <script>
-        var scriptURL = "https://script.google.com/macros/s/AKfycbwlQF0sxojJBuWHPb_S07mSIRjV4HRNw8mYPEOS9XFKKwRy2n7Ej8wSdIOLdl_cKWt8/exec";
+        var scriptURL = "https://script.google.com/macros/s/AKfycbwiEqGYrTyDLHOxUcGBXjkHXfYdT-NxMp7Tp5mPvgpnHvZ4rtEFmxTx_mS2mki4R8Ya/exec";
         var allData = [];
         var userData = null;
         var DEADLINE_DATE = new Date("2026-02-20T17:00:00");
