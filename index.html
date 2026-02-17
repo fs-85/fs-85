@@ -167,23 +167,27 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         function checkAuth() {
-            hideMobileKeyboard();
+    hideMobileKeyboard();
 
-            var pwd = document.getElementById('passwordInput').value;
-            var ad = document.getElementById('adInput').value.trim();
-            var caseId = document.getElementById('caseInput').value.trim();
+    var pwd = document.getElementById('passwordInput').value;
+    var ad = document.getElementById('adInput').value.trim();
+    var caseId = document.getElementById('caseInput').value.trim();
 
-            if (!pwd || !ad || !caseId) {
-                alert("請確實填寫所有欄位");
-                return;
-            }
+    if (!pwd || !ad || !caseId) {
+        setTimeout(function() {
+            alert("請確實填寫所有欄位");
+        }, 100);
+        return;
+    }
 
-            if (pwd !== 'chy') {
-                alert("表單密碼錯誤");
-                return;
-            }
+    if (pwd !== 'chy') {
+        setTimeout(function() {
+            alert("表單密碼錯誤");
+        }, 100);
+        return;
+    }
 
-            document.getElementById('loading').classList.remove('hidden');
+    document.getElementById('loading').classList.remove('hidden');
 
             fetch(scriptURL + "?action=getList")
                 .then(res => res.json())
