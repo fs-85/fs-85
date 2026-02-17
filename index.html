@@ -61,7 +61,7 @@
         <h2>115年書記官打字測驗</h2>
         <div class="hint">
             請確認您的資訊並選擇測驗時段。<br>
-            ⚠️ 每人限填一次，送出後無法修改 ⚠️
+            若需修改，重新提交將複寫舊資料。
         </div>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
         
@@ -122,10 +122,9 @@
     <div id="loading" class="hidden">處理中，請稍候...</div>
 
     <script>
-        var scriptURL = "https://script.google.com/macros/s/AKfycbwlQF0sxojJBuWHPb_S07mSIRjV4HRNw8mYPEOS9XFKKwRy2n7Ej8wSdIOLdl_cKWt8/exec"; // 請更換為您的後端 URL
+        var scriptURL = "https://script.google.com/macros/s/AKfycbwlQF0sxojJBuWHPb_S07mSIRjV4HRNw8mYPEOS9XFKKwRy2n7Ej8wSdIOLdl_cKWt8/exec";
         var allData = [];
         var userData = null;
-        var OPEN_DATE = new Date("2026-02-18T08:00:00");
         var DEADLINE_DATE = new Date("2026-02-20T17:00:00");
 
         window.onload = function() {
@@ -136,42 +135,48 @@
         };
 
         function checkAuth() {
-    var pwd = document.getElementById('passwordInput').value;
-    var ad = document.getElementById('adInput').value.trim();
-    var caseId = document.getElementById('caseInput').value.trim();
+            var pwd = document.getElementById('passwordInput').value;
+            var ad = document.getElementById('adInput').value.trim();
+            var caseId = document.getElementById('caseInput').value.trim();
 
-    if (pwd !== 'SHU') {
-        alert("表單密碼錯誤");
-        return;
-    }
-
-    document.getElementById('loading').classList.remove('hidden');
-
-    // 修正點：GET 請求不應加 no-cors，否則 JSON 會變 null
-    fetch(scriptURL + "?action=getList")
-        .then(res => res.json())
-        .then(data => {
-            allData = data;
-            // 驗證邏輯
-            userData = data.find(item => 
-                item.ad.toLowerCase() === ad.toLowerCase() && 
-                String(item.caseId) === caseId
-            );
-
-            if (userData) {
-                setupForm();
-                showSection('formSection');
-            } else {
-                document.getElementById('loginMsg').innerText = "AD帳號或案管帳號不正確";
+            if (pwd !== 'SHU') {
+                alert("表單密碼錯誤");
+                return;
             }
-            document.getElementById('loading').classList.add('hidden');
-        })
-        .catch(err => {
-            console.error(err);
-            alert("資料載入失敗，請確認 Script 網址是否正確或已開啟所有人存取權限。");
-            document.getElementById('loading').classList.add('hidden');
-        });
-}
+
+            document.getElementById('loading').classList.remove('hidden');
+
+            fetch(scriptURL + "?action=getList")
+                .then(res => res.json())
+                .then(data => {
+                    allData = data;
+                    userData = data.find(item => 
+                        item.ad.toLowerCase() === ad.toLowerCase() && 
+                        String(item.caseId) === caseId
+                    );
+
+                    if (userData) {
+                        setupForm();
+                        
+                        // 開放重新填報邏輯
+                        if (userData.mark === "v") {
+                            var confirmRevisit = confirm("系統偵測到您已完成填報。\n是否要修改您的資料？");
+                            if (!confirmRevisit) {
+                                location.reload();
+                                return;
+                            }
+                        }
+                        showSection('formSection');
+                    } else {
+                        document.getElementById('loginMsg').innerText = "AD帳號或案管帳號不正確";
+                    }
+                    document.getElementById('loading').classList.add('hidden');
+                })
+                .catch(err => {
+                    alert("資料載入失敗，請檢查網路或 Script 設定。");
+                    document.getElementById('loading').classList.add('hidden');
+                });
+        }
 
         function setupForm() {
             document.getElementById('autoName').value = userData.name;
@@ -188,13 +193,17 @@
 
         function handleFormSubmit(e) {
             e.preventDefault();
+            
+            // iPhone 鍵盤強制縮回
             if (document.activeElement) {
-        document.activeElement.blur();
-    }
+                document.activeElement.blur();
+            }
+            window.scrollTo(0, 0); 
+
             var time = document.getElementById('timeSelect').value;
             if (!time) { alert("請選擇測驗時段！"); return; }
 
-            if (confirm("確認時段選擇是否正確？\n選擇：" + time + "\n(送出後無法修改)")) {
+            if (confirm("確認時段選擇是否正確？\n時段：" + time)) {
                 submitData(time);
             }
         }
@@ -205,12 +214,12 @@
             document.getElementById('loading').classList.remove('hidden');
 
             var now = new Date();
-var rocYear = now.getFullYear() - 1911; // 取得民國年 (例如 115)
-var timestamp = rocYear + "/" + 
-                String(now.getMonth() + 1).padStart(2, '0') + "/" + 
-                String(now.getDate()).padStart(2, '0') + " " + 
-                String(now.getHours()).padStart(2, '0') + ":" + 
-                String(now.getMinutes()).padStart(2, '0');;
+            var rocYear = now.getFullYear() - 1911; 
+            var timestamp = rocYear + "/" + 
+                            String(now.getMonth() + 1).padStart(2, '0') + "/" + 
+                            String(now.getDate()).padStart(2, '0') + " " + 
+                            String(now.getHours()).padStart(2, '0') + ":" + 
+                            String(now.getMinutes()).padStart(2, '0');
 
             var payload = {
                 name: userData.name,
@@ -227,6 +236,10 @@ var timestamp = rocYear + "/" +
             }).then(() => {
                 showSection('thankYouSection');
                 document.getElementById('loading').classList.add('hidden');
+            }).catch(() => {
+                alert("提交失敗，請洽資訊人員。");
+                btn.disabled = false;
+                document.getElementById('loading').classList.add('hidden');
             });
         }
 
@@ -237,10 +250,15 @@ var timestamp = rocYear + "/" +
             document.getElementById(id).classList.remove('hidden');
         }
 
-        function toggleSection(id) { showSection(id); }
+        function toggleSection(id) { 
+            // 進入不同頁面時也強迫鍵盤縮回
+            if (document.activeElement) document.activeElement.blur();
+            showSection(id); 
+        }
 
         function queryStatus() {
             var name = document.getElementById('queryNameSelect').value;
+            if (!name) { alert("請先選擇姓名"); return; }
             var found = allData.find(i => i.name === name);
             if (found && found.mark === "v") alert(name + " 已完成填報！");
             else alert(name + " 尚未填報。");
