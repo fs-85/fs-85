@@ -398,41 +398,48 @@ function formatTimeForGoogle(dateStr, isEnd) {
 }
 
 function addToGoogleCalendar() {
-    if (!lastSelectedTime) return;
+    if (!lastSelectedTime) { alert("找不到填報時間，請重新操作"); return; }
     
     const start = formatTimeForGoogle(lastSelectedTime, false);
     const end = formatTimeForGoogle(lastSelectedTime, true);
     const title = encodeURIComponent("書記官打字測驗");
-    const details = encodeURIComponent("地點：彰化分署\n備註：請準時參加");
+    const details = encodeURIComponent("請準時參加測驗");
+    const location = encodeURIComponent("彰化分署");
     
-    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${encodeURIComponent("彰化分署")}`;
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
+    
     window.open(url, '_blank');
 }
 
 function addToAppleCalendar() {
-    if (!lastSelectedTime) return;
+    if (!lastSelectedTime) { alert("找不到填報時間，請重新操作"); return; }
 
     const start = formatTimeForGoogle(lastSelectedTime, false);
     const end = formatTimeForGoogle(lastSelectedTime, true);
-    
+
     const icsContent = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
+        "PRODID:-//彰化分署//打字測驗預約//TW",
         "BEGIN:VEVENT",
         `DTSTART:${start}`,
         `DTEND:${end}`,
         "SUMMARY:書記官打字測驗",
-        "DESCRIPTION:請準時參加測驗",
+        "DESCRIPTION:請準時至指定地點參加測驗",
         "LOCATION:彰化分署",
         "END:VEVENT",
         "END:VCALENDAR"
-    ].join("\n");
+    ].join("\r\n");
 
-    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const base64Ics = btoa(unescape(encodeURIComponent(icsContent)));
+    const calendarUrl = 'data:text/calendar;base64,' + base64Ics;
+
     const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = "預約行程.ics";
+    link.href = calendarUrl;
+    link.download = "event.ics";
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
 }
 </script>
 </body>
