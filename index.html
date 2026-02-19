@@ -164,40 +164,71 @@
     });
 
     window.onload = function() {
-        var ua = navigator.userAgent || navigator.vendor || window.opera;
-        var isLine = (ua.indexOf("Line") > -1);
+    var currentUrl = window.location.href;
 
-        var overlay = document.createElement('div');
-        overlay.id = 'overlay';
-        document.body.appendChild(overlay);
+    var overlay = document.createElement('div');
+    overlay.id = 'overlay';
+    document.body.appendChild(overlay);
 
-        var alertBox = document.createElement('div');
-        alertBox.id = 'customAlert';
-        
-        var p = document.createElement('p');
-        p.style.cssText = "color: red; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; text-align: center;";
-        
-        if (isLine) {
-            p.innerHTML = "⚠️偵測到 LINE 瀏覽器⚠️<br>若需使用行事曆功能，請點擊右上角「...」並選擇使用 Safari 或 瀏覽器開啟。";
-        } else {
-            p.innerHTML = "⚠️系統提示⚠️<br>為確認為本人填報<br>請輸入驗證資訊";
-        }
-        
-        alertBox.appendChild(p);
-        var btn = document.createElement('button');
-        btn.className = "btn-primary";
-        btn.innerText = "確定";
-        btn.onclick = function() { overlay.remove(); alertBox.remove(); };
-        alertBox.appendChild(btn);
-        document.body.appendChild(alertBox);
+    var alertBox = document.createElement('div');
+    alertBox.id = 'customAlert';
+    alertBox.style.maxWidth = "350px";
 
-        var now = new Date();
-        if (now > DEADLINE_DATE) {
-            showSection('closedSection');
-            if(overlay) overlay.remove();
-            if(alertBox) alertBox.remove();
-        }
+    var topHint = document.createElement('p');
+    topHint.style.cssText = "color: #555; font-size: 0.85em; margin-bottom: 10px; text-align: center; line-height: 1.4;";
+    topHint.innerHTML = "💡 如需使用「加入行事曆」功能<br>請使用外部瀏覽器開啟本網頁";
+    alertBox.appendChild(topHint);
+
+    var btnGroup = document.createElement('div');
+    btnGroup.style.cssText = "display: flex; gap: 8px; margin-bottom: 20px;";
+
+    var safariBtn = document.createElement('button');
+    safariBtn.className = "btn-secondary";
+    safariBtn.style.cssText = "flex: 1; background-color: #007AFF; font-size: 14px; padding: 8px;";
+    safariBtn.innerText = "Safari 開啟";
+    safariBtn.onclick = function() {
+        alert("iPhone 使用者請點擊右下角「...」\n選擇『在 Safari 開啟』");
     };
+
+    var chromeBtn = document.createElement('button');
+    chromeBtn.className = "btn-secondary";
+    chromeBtn.style.cssText = "flex: 1; background-color: #4285F4; font-size: 14px; padding: 8px;";
+    chromeBtn.innerText = "Chrome 開啟";
+    chromeBtn.onclick = function() {
+        var chromeUrl = currentUrl.replace(/^https?:\/\//, "googlechrome://");
+        window.location.href = chromeUrl;
+        setTimeout(function() {
+            alert("若未自動跳轉，請手動複製網址至 Chrome 貼上");
+        }, 1500);
+    };
+
+    btnGroup.appendChild(safariBtn);
+    btnGroup.appendChild(chromeBtn);
+    alertBox.appendChild(btnGroup);
+
+    var p = document.createElement('p');
+    p.style.cssText = "color: red; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; text-align: center;";
+    p.innerHTML = "⚠️ 為確認為本人填報<br>請輸入驗證資訊";
+    alertBox.appendChild(p);
+
+    var btn = document.createElement('button');
+    btn.className = "btn-primary";
+    btn.innerText = "確定";
+    btn.onclick = function() {
+        overlay.remove();
+        alertBox.remove();
+    };
+    
+    alertBox.appendChild(btn);
+    document.body.appendChild(alertBox);
+
+    var now = new Date();
+    if (now > DEADLINE_DATE) {
+        showSection('closedSection');
+        if(overlay) overlay.remove();
+        if(alertBox) alertBox.remove();
+    }
+};
 
     function hideMobileKeyboard() {
         if (document.activeElement) document.activeElement.blur();
