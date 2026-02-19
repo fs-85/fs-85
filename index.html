@@ -192,22 +192,36 @@ document.addEventListener('DOMContentLoaded', function() {
 window.onload = function() {
     var overlay = document.createElement('div');
     overlay.id = 'overlay';
+    document.body.appendChild(overlay);
+
     var alertBox = document.createElement('div');
     alertBox.id = 'customAlert';
-    alertBox.innerHTML = `
-        <p style="color: red; font-weight: bold; font-size: 1.1em; margin-bottom: 15px;">
-            ⚠️ 為確認為本人填報<br>請輸入驗證資訊
-        </p>
-        <button class="btn-primary" style="margin-top:0;" onclick="closeTip()">確定</button>
-    `;
-    document.body.appendChild(overlay);
+    
+    var p = document.createElement('p');
+    p.style.cssText = "color: red; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; text-align: center;";
+    p.innerHTML = "⚠️系統提示⚠️<br>為確認為本人填報<br>請輸入驗證資訊";
+    alertBox.appendChild(p);
+
+    var btn = document.createElement('button');
+    btn.className = "btn-primary";
+    btn.style.marginTop = "0";
+    btn.innerText = "確定";
+    
+    btn.onclick = function() {
+        overlay.remove();
+        alertBox.remove();
+    };
+    
+    alertBox.appendChild(btn);
     document.body.appendChild(alertBox);
 
     var now = new Date();
     if (now > DEADLINE_DATE) {
         showSection('closedSection');
-        closeTip();
+        if(overlay) overlay.remove();
+        if(alertBox) alertBox.remove();
     }
+};
 };
 
         function checkAuth() {
