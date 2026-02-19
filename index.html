@@ -28,6 +28,26 @@
         .status-table th { background-color: #f2f2f2; }
         .scrollable-list { max-height: 300px; overflow-y: auto; margin-top: 10px; border: 1px solid #eee; }
         .hint { color: #666; font-size: 0.85em; text-align: center; line-height: 1.6; margin-bottom: 15px; }
+        #customAlert {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    z-index: 10000;
+    width: 80%;
+    max-width: 300px;
+    text-align: center;
+}
+#overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+}
     </style>
 </head>
 <body>
@@ -169,13 +189,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 50);
         }
 
-        window.onload = function() {
-            alert("【系統提示】\n為確保填報資料之正確性及安全性，本表單需驗證人員身分。\n請備妥您的「表單密碼」、「電腦帳號」及「案管系統帳號」進行登入。");
-            var now = new Date();
-            if (now > DEADLINE_DATE) {
-                showSection('closedSection');
-            }
-        };
+window.onload = function() {
+    var overlay = document.createElement('div');
+    overlay.id = 'overlay';
+    var alertBox = document.createElement('div');
+    alertBox.id = 'customAlert';
+    alertBox.innerHTML = `
+        <p style="color: red; font-weight: bold; font-size: 1.1em; margin-bottom: 15px;">
+            ⚠️ 為確認為本人填報<br>請輸入驗證資訊
+        </p>
+        <button class="btn-primary" style="margin-top:0;" onclick="closeTip()">確定</button>
+    `;
+    document.body.appendChild(overlay);
+    document.body.appendChild(alertBox);
+
+    var now = new Date();
+    if (now > DEADLINE_DATE) {
+        showSection('closedSection');
+        closeTip();
+    }
+};
 
         function checkAuth() {
     hideMobileKeyboard();
