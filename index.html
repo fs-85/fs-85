@@ -163,7 +163,7 @@
         }
     });
 
-    window.onload = function() {
+window.onload = function() {
     var currentUrl = window.location.href;
 
     var overlay = document.createElement('div');
@@ -172,22 +172,22 @@
 
     var alertBox = document.createElement('div');
     alertBox.id = 'customAlert';
-    alertBox.style.maxWidth = "350px";
-
+    alertBox.style.maxWidth = "350px"; 
+    
     var topHint = document.createElement('p');
     topHint.style.cssText = "color: #555; font-size: 0.85em; margin-bottom: 10px; text-align: center; line-height: 1.4;";
-    topHint.innerHTML = "💡 如需使用「加入行事曆」功能<br>請使用外部瀏覽器開啟本網頁";
+    topHint.innerHTML = "💡 如需使用「加入行事曆」功能<br>請切換至外部瀏覽器開啟";
     alertBox.appendChild(topHint);
 
     var btnGroup = document.createElement('div');
     btnGroup.style.cssText = "display: flex; gap: 8px; margin-bottom: 20px;";
-
+    
     var safariBtn = document.createElement('button');
     safariBtn.className = "btn-secondary";
     safariBtn.style.cssText = "flex: 1; background-color: #007AFF; font-size: 14px; padding: 8px;";
     safariBtn.innerText = "Safari 指引";
     safariBtn.onclick = function() {
-        alert("【iPhone 使用者】\n請複製下方網址並貼上至 Safari 瀏覽器：\n\n" + currentUrl);
+        showCopyDialog("【iPhone 使用者】", "請點擊下方按鈕複製網址，並貼上至 Safari 瀏覽器開啟：");
     };
 
     var chromeBtn = document.createElement('button');
@@ -198,8 +198,8 @@
         var chromeUrl = currentUrl.replace(/^https?:\/\//, "googlechrome://");
         window.location.href = chromeUrl;
         setTimeout(function() {
-            alert("若未自動跳轉，請手動複製網址至 Chrome 貼上");
-        }, 1500);
+            showCopyDialog("【Chrome 開啟失敗】", "若未自動跳轉，請複製網址手動開啟：");
+        }, 1000);
     };
 
     btnGroup.appendChild(safariBtn);
@@ -213,7 +213,7 @@
 
     var btn = document.createElement('button');
     btn.className = "btn-primary";
-    btn.innerText = "確定";
+    btn.innerText = "確定進入";
     btn.onclick = function() {
         overlay.remove();
         alertBox.remove();
@@ -221,6 +221,19 @@
     
     alertBox.appendChild(btn);
     document.body.appendChild(alertBox);
+
+    function showCopyDialog(title, msg) {
+        var copyText = currentUrl;
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(copyText).then(function() {
+                alert(title + "\n" + msg + "\n\n網址已自動複製成功！\n請直接去瀏覽器貼上。");
+            }, function() {
+                window.prompt(title + "\n" + msg + "\n請長按下方網址複製：", copyText);
+            });
+        } else {
+            window.prompt(title + "\n" + msg + "\n請長按下方網址複製：", copyText);
+        }
+    }
 
     var now = new Date();
     if (now > DEADLINE_DATE) {
