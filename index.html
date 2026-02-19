@@ -28,7 +28,7 @@
         .status-table th { background-color: #f2f2f2; }
         .scrollable-list { max-height: 300px; overflow-y: auto; margin-top: 10px; border: 1px solid #eee; }
         .hint { color: #666; font-size: 0.85em; text-align: center; line-height: 1.6; margin-bottom: 15px; }
-        #customAlert { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.3); z-index: 10000; width: 80%; max-width: 300px; text-align: center; }
+        #customAlert { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.3); z-index: 10000; width: 80%; max-width: 350px; text-align: center; }
         #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; }
     </style>
 </head>
@@ -120,12 +120,8 @@
 
     <div class="container hidden" id="thankYouSection">
         <h2 style="color: #28a745;">提交成功！</h2>
-        <p style="text-align:center;">您選擇的時段已填報完成</p>
+        <p style="text-align:center; margin-bottom: 20px;">您選擇的時段已填報完成</p>
         
-        <p style="color: red; font-size: 0.85em; text-align: center; margin-bottom: 8px; font-weight: bold;">
-            ⚠️ LINE 使用者請改用 Safari/Chrome 開啟本頁<br>方可使用下方「加入行事曆」功能
-        </p>
-
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
             <button class="btn-secondary" style="background-color: #000; flex: 1; border-radius: 6px;" onclick="addToAppleCalendar()">Apple 行事曆</button>
             <button class="btn-secondary" style="background-color: #4285F4; flex: 1; border-radius: 6px;" onclick="addToGoogleCalendar()">Google 行事曆</button>
@@ -163,85 +159,81 @@
         }
     });
 
-window.onload = function() {
-    var currentUrl = window.location.href;
+    window.onload = function() {
+        var currentUrl = window.location.href;
+        var overlay = document.createElement('div');
+        overlay.id = 'overlay';
+        document.body.appendChild(overlay);
 
-    var overlay = document.createElement('div');
-    overlay.id = 'overlay';
-    document.body.appendChild(overlay);
+        var alertBox = document.createElement('div');
+        alertBox.id = 'customAlert';
+        
+        var topHint = document.createElement('p');
+        topHint.style.cssText = "color: #555; font-size: 0.85em; margin-bottom: 10px; text-align: center; line-height: 1.4;";
+        topHint.innerHTML = "💡 如需使用「加入行事曆」功能<br>請切換至外部瀏覽器開啟";
+        alertBox.appendChild(topHint);
 
-    var alertBox = document.createElement('div');
-    alertBox.id = 'customAlert';
-    alertBox.style.maxWidth = "350px"; 
-    
-    var topHint = document.createElement('p');
-    topHint.style.cssText = "color: #555; font-size: 0.85em; margin-bottom: 10px; text-align: center; line-height: 1.4;";
-    topHint.innerHTML = "💡 如需使用「加入行事曆」功能<br>請切換至外部瀏覽器開啟";
-    alertBox.appendChild(topHint);
+        var btnGroup = document.createElement('div');
+        btnGroup.style.cssText = "display: flex; gap: 8px; margin-bottom: 20px;";
+        
+        // Apple 使用者引導
+        var appleBtn = document.createElement('button');
+        appleBtn.className = "btn-secondary";
+        appleBtn.style.cssText = "flex: 1; background-color: #000; font-size: 14px; padding: 8px;";
+        appleBtn.innerText = "Apple 使用者";
+        appleBtn.onclick = function() {
+            showCopyDialog("【Apple 使用者指引】", "請點擊下方按鈕複製網址，並貼上至 Safari 瀏覽器開啟。");
+        };
 
-    var btnGroup = document.createElement('div');
-    btnGroup.style.cssText = "display: flex; gap: 8px; margin-bottom: 20px;";
-    
-    var safariBtn = document.createElement('button');
-    safariBtn.className = "btn-secondary";
-    safariBtn.style.cssText = "flex: 1; background-color: #007AFF; font-size: 14px; padding: 8px;";
-    safariBtn.innerText = "Safari 指引";
-    safariBtn.onclick = function() {
-        showCopyDialog("【iPhone 使用者】", "請複製網址至 Safari 瀏覽器開啟：");
-    };
+        // Google 使用者引導
+        var googleBtn = document.createElement('button');
+        googleBtn.className = "btn-secondary";
+        googleBtn.style.cssText = "flex: 1; background-color: #4285F4; font-size: 14px; padding: 8px;";
+        googleBtn.innerText = "Google 使用者";
+        googleBtn.onclick = function() {
+            var chromeUrl = currentUrl.replace(/^https?:\/\//, "googlechrome://");
+            window.location.href = chromeUrl;
+            setTimeout(function() {
+                showCopyDialog("【Google 使用者指引】", "若未自動跳轉，請複製網址並使用 Chrome 開啟。");
+            }, 1000);
+        };
 
-    var chromeBtn = document.createElement('button');
-    chromeBtn.className = "btn-secondary";
-    chromeBtn.style.cssText = "flex: 1; background-color: #4285F4; font-size: 14px; padding: 8px;";
-    chromeBtn.innerText = "Chrome 開啟";
-    chromeBtn.onclick = function() {
-        var chromeUrl = currentUrl.replace(/^https?:\/\//, "googlechrome://");
-        window.location.href = chromeUrl;
-        setTimeout(function() {
-            showCopyDialog("【Chrome 開啟失敗】", "若未自動跳轉，請複製網址手動開啟：");
-        }, 1000);
-    };
+        btnGroup.appendChild(appleBtn);
+        btnGroup.appendChild(googleBtn);
+        alertBox.appendChild(btnGroup);
 
-    btnGroup.appendChild(safariBtn);
-    btnGroup.appendChild(chromeBtn);
-    alertBox.appendChild(btnGroup);
+        var p = document.createElement('p');
+        p.style.cssText = "color: red; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; text-align: center;";
+        p.innerHTML = "⚠️ 為確認為本人填報<br>請輸入驗證資訊";
+        alertBox.appendChild(p);
 
-    var p = document.createElement('p');
-    p.style.cssText = "color: red; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; text-align: center;";
-    p.innerHTML = "⚠️ 為確認為本人填報<br>請輸入驗證資訊";
-    alertBox.appendChild(p);
+        var btn = document.createElement('button');
+        btn.className = "btn-primary";
+        btn.innerText = "確定進入";
+        btn.onclick = function() { overlay.remove(); alertBox.remove(); };
+        alertBox.appendChild(btn);
+        document.body.appendChild(alertBox);
 
-    var btn = document.createElement('button');
-    btn.className = "btn-primary";
-    btn.innerText = "確定進入";
-    btn.onclick = function() {
-        overlay.remove();
-        alertBox.remove();
-    };
-    
-    alertBox.appendChild(btn);
-    document.body.appendChild(alertBox);
-
-    function showCopyDialog(title, msg) {
-        var copyText = currentUrl;
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(copyText).then(function() {
-                alert(title + "\n" + msg + "\n\n網址已自動複製成功！\n請直接去瀏覽器貼上。");
-            }, function() {
+        function showCopyDialog(title, msg) {
+            var copyText = currentUrl;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(copyText).then(function() {
+                    alert(title + "\n" + msg + "\n\n網址已自動複製成功！\n請直接至瀏覽器貼上開啟。");
+                }, function() {
+                    window.prompt(title + "\n" + msg + "\n請長按下方網址複製：", copyText);
+                });
+            } else {
                 window.prompt(title + "\n" + msg + "\n請長按下方網址複製：", copyText);
-            });
-        } else {
-            window.prompt(title + "\n" + msg + "\n請長按下方網址複製：", copyText);
+            }
         }
-    }
 
-    var now = new Date();
-    if (now > DEADLINE_DATE) {
-        showSection('closedSection');
-        if(overlay) overlay.remove();
-        if(alertBox) alertBox.remove();
-    }
-};
+        var now = new Date();
+        if (now > DEADLINE_DATE) {
+            showSection('closedSection');
+            if(overlay) overlay.remove();
+            if(alertBox) alertBox.remove();
+        }
+    };
 
     function hideMobileKeyboard() {
         if (document.activeElement) document.activeElement.blur();
