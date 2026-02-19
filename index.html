@@ -136,11 +136,17 @@
         </div>
     </div>
 
-    <div class="container hidden" id="thankYouSection">
-        <h2 style="color: #28a745;">提交成功！</h2>
-        <p style="text-align:center;">您選擇的時段已填報完成</p>
-        <button class="btn-primary" onclick="location.reload()">回到首頁</button>
+<div class="container hidden" id="thankYouSection">
+    <h2 style="color: #28a745;">提交成功！</h2>
+    <p style="text-align:center;">您選擇的時段已填報完成</p>
+    
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <button class="btn-secondary" style="background-color: #000; flex: 1;" onclick="addToAppleCalendar()">Apple 行事曆</button>
+        <button class="btn-secondary" style="background-color: #4285F4; flex: 1;" onclick="addToGoogleCalendar()">Google 行事曆</button>
     </div>
+
+    <button class="btn-primary" onclick="location.reload()">回到首頁</button>
+</div>
 
     <div id="loading" class="hidden">處理中，請稍候...</div>
 
@@ -311,6 +317,7 @@
     }
 
     function submitData(selectedTime) {
+        lastSelectedTime = selectedTime;
         var btn = document.getElementById('submitBtn');
         btn.disabled = true;
         document.getElementById('loading').classList.remove('hidden');
@@ -374,6 +381,59 @@
         });
         document.getElementById('allStatusContainer').classList.remove('hidden');
     }
+        var lastSelectedTime = "";
+
+function formatTimeForGoogle(dateStr, isEnd) {
+    let parts = dateStr.split(' ');
+    let dateParts = parts[0].split('/');
+    let year = parseInt(dateParts[0]) + 1911;
+    let month = dateParts[1];
+    let day = dateParts[2];
+    
+    let timeRange = parts[1].split('-');
+    let time = isEnd ? timeRange[1] : timeRange[0];
+    let [hh, mm] = time.split(':');
+    
+    return `${year}${month}${day}T${hh}${mm}00`;
+}
+
+function addToGoogleCalendar() {
+    if (!lastSelectedTime) return;
+    
+    const start = formatTimeForGoogle(lastSelectedTime, false);
+    const end = formatTimeForGoogle(lastSelectedTime, true);
+    const title = encodeURIComponent("書記官打字測驗");
+    const details = encodeURIComponent("地點：彰化分署\n備註：請準時參加");
+    
+    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${encodeURIComponent("彰化分署")}`;
+    window.open(url, '_blank');
+}
+
+function addToAppleCalendar() {
+    if (!lastSelectedTime) return;
+
+    const start = formatTimeForGoogle(lastSelectedTime, false);
+    const end = formatTimeForGoogle(lastSelectedTime, true);
+    
+    const icsContent = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "BEGIN:VEVENT",
+        `DTSTART:${start}`,
+        `DTEND:${end}`,
+        "SUMMARY:書記官打字測驗",
+        "DESCRIPTION:請準時參加測驗",
+        "LOCATION:彰化分署",
+        "END:VEVENT",
+        "END:VCALENDAR"
+    ].join("\n");
+
+    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.download = "預約行程.ics";
+    link.click();
+}
 </script>
 </body>
 </html>
