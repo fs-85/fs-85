@@ -185,9 +185,9 @@
     var safariBtn = document.createElement('button');
     safariBtn.className = "btn-secondary";
     safariBtn.style.cssText = "flex: 1; background-color: #007AFF; font-size: 14px; padding: 8px;";
-    safariBtn.innerText = "Safari 開啟";
+    safariBtn.innerText = "Safari 指引";
     safariBtn.onclick = function() {
-        alert("iPhone 使用者請點擊右下角「...」\n選擇『在 Safari 開啟』");
+        alert("【iPhone 使用者】\n請複製下方網址並貼上至 Safari 瀏覽器：\n\n" + currentUrl);
     };
 
     var chromeBtn = document.createElement('button');
