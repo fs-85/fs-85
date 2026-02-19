@@ -145,235 +145,235 @@
     <div id="loading" class="hidden">處理中，請稍候...</div>
 
     <script>
-        var scriptURL = "https://script.google.com/macros/s/AKfycbyoLsbsx_wu9SwWLDrkuByvgVGCde1_oplVOa7K9OZDltrlmwUNNtPBD7110eZa_wbL/exec";
-        var allData = [];
-        var userData = null;
-        var DEADLINE_DATE = new Date("2026-02-20T17:00:00");
+    var scriptURL = "https://script.google.com/macros/s/AKfycbyoLsbsx_wu9SwWLDrkuByvgVGCde1_oplVOa7K9OZDltrlmwUNNtPBD7110eZa_wbL/exec";
+    var allData = [];
+    var userData = null;
+    var DEADLINE_DATE = new Date("2026-02-20T17:00:00");
 
-document.addEventListener('DOMContentLoaded', function() {
-    const loginFields = ['passwordInput', 'adInput', 'caseInput'];
-    ['adInput', 'caseInput'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('focus', function() {
-                this.type = 'password'; 
-            });
-            el.addEventListener('input', function() {
-                this.type = 'text'; 
+    // 1. 處理輸入過濾與鍵盤切換
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginFields = ['passwordInput', 'adInput', 'caseInput'];
+        ['adInput', 'caseInput'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('focus', function() {
+                    this.type = 'password'; 
+                });
+                el.addEventListener('input', function() {
+                    this.type = 'text'; 
+                    this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+                });
+            }
+        });
+
+        const pwdEl = document.getElementById('passwordInput');
+        if (pwdEl) {
+            pwdEl.addEventListener('input', function() {
                 this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
             });
         }
     });
 
-    const pwdEl = document.getElementById('passwordInput');
-    if (pwdEl) {
-        pwdEl.addEventListener('input', function() {
-            this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+    // 2. 收起鍵盤函式
+    function hideMobileKeyboard() {
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+        var field = document.createElement('input');
+        field.setAttribute('type', 'text');
+        field.setAttribute('style', 'position:absolute; top: 0px; opacity: 0;');
+        document.body.appendChild(field);
+        field.focus();
+        setTimeout(function() {
+            field.blur();
+            document.body.removeChild(field);
+            window.scrollTo(0, 0);
+        }, 50);
+    }
+
+    // 3. 頁面載入與提示視窗 (修正此處的括號錯誤)
+    window.onload = function() {
+        var overlay = document.createElement('div');
+        overlay.id = 'overlay';
+        document.body.appendChild(overlay);
+
+        var alertBox = document.createElement('div');
+        alertBox.id = 'customAlert';
+        
+        var p = document.createElement('p');
+        p.style.cssText = "color: red; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; text-align: center;";
+        p.innerHTML = "⚠️系統提示⚠️<br>為確認為本人填報<br>請輸入驗證資訊";
+        alertBox.appendChild(p);
+
+        var btn = document.createElement('button');
+        btn.className = "btn-primary";
+        btn.style.marginTop = "0";
+        btn.innerText = "確定";
+        
+        btn.onclick = function() {
+            overlay.remove();
+            alertBox.remove();
+        };
+        
+        alertBox.appendChild(btn);
+        document.body.appendChild(alertBox);
+
+        var now = new Date();
+        if (now > DEADLINE_DATE) {
+            showSection('closedSection');
+            if(overlay) overlay.remove();
+            if(alertBox) alertBox.remove();
+        }
+    }; // 這裡現在是正確的單一結束括號
+
+    // 4. 登入驗證邏輯
+    function checkAuth() {
+        hideMobileKeyboard();
+
+        var pwd = document.getElementById('passwordInput').value;
+        var ad = document.getElementById('adInput').value.trim();
+        var caseId = document.getElementById('caseInput').value.trim();
+
+        if (!pwd || !ad || !caseId) {
+            setTimeout(function() {
+                alert("請確實填寫所有欄位");
+            }, 100);
+            return;
+        }
+
+        if (pwd !== 'chy') {
+            setTimeout(function() {
+                alert("表單密碼錯誤");
+            }, 100);
+            return;
+        }
+
+        document.getElementById('loading').classList.remove('hidden');
+
+        fetch(scriptURL + "?action=getList")
+            .then(res => res.json())
+            .then(data => {
+                allData = data;
+                userData = data.find(item => 
+                    item.ad.toLowerCase() === ad.toLowerCase() && 
+                    String(item.caseId) === caseId
+                );
+
+                if (userData) {
+                    setupForm();
+                    if (userData.mark === "v") {
+                        setTimeout(function(){
+                            var confirmRevisit = confirm("系統偵測到您已完成填報\n是否要修改您的資料？");
+                            if (!confirmRevisit) {
+                                location.reload();
+                                return;
+                            }
+                            showSection('formSection');
+                        }, 200);
+                    } else {
+                        showSection('formSection');
+                    } 
+                } else {
+                    document.getElementById('loginMsg').innerText = "電腦帳號或案管系統帳號錯誤";
+                }
+                document.getElementById('loading').classList.add('hidden');
+            })
+            .catch(err => {
+                alert("資料載入失敗，請聯絡資訊工程師#3216");
+                document.getElementById('loading').classList.add('hidden');
+            });
+    }
+
+    // 5. 其他功能函式
+    function setupForm() {
+        document.getElementById('autoName').value = userData.name;
+        document.getElementById('autoInfo').value = userData.section + " / " + userData.title;
+        
+        var qSelect = document.getElementById('queryNameSelect');
+        qSelect.innerHTML = '<option value="" disabled selected>請選擇...</option>';
+        allData.forEach(item => {
+            var opt = document.createElement('option');
+            opt.value = item.name; opt.text = item.name;
+            qSelect.appendChild(opt);
         });
     }
-});
 
-        function hideMobileKeyboard() {
-            if (document.activeElement) {
-                document.activeElement.blur();
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        hideMobileKeyboard();
+        var time = document.getElementById('timeSelect').value;
+        if (!time) { alert("請選擇測驗時段！"); return; }
+        setTimeout(function() {
+            if (confirm("確認時段選擇是否正確？\n時段：" + time)) {
+                submitData(time);
             }
-            var field = document.createElement('input');
-            field.setAttribute('type', 'text');
-            field.setAttribute('style', 'position:absolute; top: 0px; opacity: 0;');
-            document.body.appendChild(field);
-            field.focus();
-            setTimeout(function() {
-                field.blur();
-                document.body.removeChild(field);
-                window.scrollTo(0, 0);
-            }, 50);
-        }
-
-window.onload = function() {
-    var overlay = document.createElement('div');
-    overlay.id = 'overlay';
-    document.body.appendChild(overlay);
-
-    var alertBox = document.createElement('div');
-    alertBox.id = 'customAlert';
-    
-    var p = document.createElement('p');
-    p.style.cssText = "color: red; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; text-align: center;";
-    p.innerHTML = "⚠️系統提示⚠️<br>為確認為本人填報<br>請輸入驗證資訊";
-    alertBox.appendChild(p);
-
-    var btn = document.createElement('button');
-    btn.className = "btn-primary";
-    btn.style.marginTop = "0";
-    btn.innerText = "確定";
-    
-    btn.onclick = function() {
-        overlay.remove();
-        alertBox.remove();
-    };
-    
-    alertBox.appendChild(btn);
-    document.body.appendChild(alertBox);
-
-    var now = new Date();
-    if (now > DEADLINE_DATE) {
-        showSection('closedSection');
-        if(overlay) overlay.remove();
-        if(alertBox) alertBox.remove();
-    }
-};
-};
-
-        function checkAuth() {
-    hideMobileKeyboard();
-
-    var pwd = document.getElementById('passwordInput').value;
-    var ad = document.getElementById('adInput').value.trim();
-    var caseId = document.getElementById('caseInput').value.trim();
-
-    if (!pwd || !ad || !caseId) {
-        setTimeout(function() {
-            alert("請確實填寫所有欄位");
         }, 100);
-        return;
     }
 
-    if (pwd !== 'chy') {
-        setTimeout(function() {
-            alert("表單密碼錯誤");
-        }, 100);
-        return;
+    function submitData(selectedTime) {
+        var btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        document.getElementById('loading').classList.remove('hidden');
+        var now = new Date();
+        var rocYear = now.getFullYear() - 1911; 
+        var timestamp = rocYear + "/" +
+            String(now.getMonth() + 1).padStart(2, '0') + "/" + 
+            String(now.getDate()).padStart(2, '0') + " " + 
+            String(now.getHours()).padStart(2, '0') + ":" + 
+            String(now.getMinutes()).padStart(2, '0');
+
+        var payload = {
+            name: userData.name,
+            selectedTime: selectedTime,
+            note: document.getElementById('inputNote').value,
+            submitTime: timestamp,
+            mark: "v"
+        };
+
+        fetch(scriptURL, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            mode: 'no-cors'
+        }).then(() => {
+            showSection('thankYouSection');
+            document.getElementById('loading').classList.add('hidden');
+        }).catch(() => {
+            alert("提交失敗，請聯絡資訊工程師#3216");
+            btn.disabled = false;
+            document.getElementById('loading').classList.add('hidden');
+        });
     }
 
-    document.getElementById('loading').classList.remove('hidden');
+    function showSection(id) {
+        ['loginSection', 'closedSection', 'formSection', 'querySection', 'thankYouSection'].forEach(sec => {
+            document.getElementById(sec).classList.add('hidden');
+        });
+        document.getElementById(id).classList.remove('hidden');
+    }
 
-            fetch(scriptURL + "?action=getList")
-                .then(res => res.json())
-                .then(data => {
-                    allData = data;
-                    userData = data.find(item => 
-                        item.ad.toLowerCase() === ad.toLowerCase() && 
-                        String(item.caseId) === caseId
-                    );
+    function toggleSection(id) { 
+        hideMobileKeyboard();
+        showSection(id); 
+    }
 
-                    if (userData) {
-                        setupForm();
-                        if (userData.mark === "v") {
-                            setTimeout(function(){
-                                var confirmRevisit = confirm("系統偵測到您已完成填報\n是否要修改您的資料？");
-                                if (!confirmRevisit) {
-                                    location.reload();
-                                    return;
-                                }
-                                showSection('formSection');
-                            }, 200);
-                        } else {
-                            showSection('formSection');
-                        } 
-                    } else {
-                        document.getElementById('loginMsg').innerText = "電腦帳號或案管系統帳號錯誤";
-                    }
-                    document.getElementById('loading').classList.add('hidden');
-                })
-                .catch(err => {
-                    alert("資料載入失敗，請聯絡資訊工程師#3216");
-                    document.getElementById('loading').classList.add('hidden');
-                });
-        }
+    function queryStatus() {
+        var name = document.getElementById('queryNameSelect').value;
+        if (!name) { alert("請先選擇姓名"); return; }
+        var found = allData.find(i => i.name === name);
+        if (found && found.mark === "v") alert(name + " 已完成填報！");
+        else alert(name + " 尚未填報。");
+    }
 
-        function setupForm() {
-            document.getElementById('autoName').value = userData.name;
-            document.getElementById('autoInfo').value = userData.section + " / " + userData.title;
-            
-            var qSelect = document.getElementById('queryNameSelect');
-            qSelect.innerHTML = '<option value="" disabled selected>請選擇...</option>';
-            allData.forEach(item => {
-                var opt = document.createElement('option');
-                opt.value = item.name; opt.text = item.name;
-                qSelect.appendChild(opt);
-            });
-        }
-
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            
-            hideMobileKeyboard();
-
-            var time = document.getElementById('timeSelect').value;
-            if (!time) { alert("請選擇測驗時段！"); return; }
-
-            setTimeout(function() {
-                if (confirm("確認時段選擇是否正確？\n時段：" + time)) {
-                    submitData(time);
-                }
-            }, 100);
-        }
-
-        function submitData(selectedTime) {
-            var btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            document.getElementById('loading').classList.remove('hidden');
-
-            var now = new Date();
-            var rocYear = now.getFullYear() - 1911; 
-            var timestamp = rocYear + "/" +
-                String(now.getMonth() + 1).padStart(2, '0') + "/" + 
-                String(now.getDate()).padStart(2, '0') + " " + 
-                String(now.getHours()).padStart(2, '0') + ":" + 
-                String(now.getMinutes()).padStart(2, '0');
-
-            var payload = {
-                name: userData.name,
-                selectedTime: selectedTime,
-                note: document.getElementById('inputNote').value,
-                submitTime: timestamp,
-                mark: "v"
-            };
-
-            fetch(scriptURL, {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                mode: 'no-cors'
-            }).then(() => {
-                showSection('thankYouSection');
-                document.getElementById('loading').classList.add('hidden');
-            }).catch(() => {
-                alert("提交失敗，請聯絡資訊工程師#3216");
-                btn.disabled = false;
-                document.getElementById('loading').classList.add('hidden');
-            });
-        }
-
-        function showSection(id) {
-            ['loginSection', 'closedSection', 'formSection', 'querySection', 'thankYouSection'].forEach(sec => {
-                document.getElementById(sec).classList.add('hidden');
-            });
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function toggleSection(id) { 
-            hideMobileKeyboard();
-            showSection(id); 
-        }
-
-        function queryStatus() {
-            var name = document.getElementById('queryNameSelect').value;
-            if (!name) { alert("請先選擇姓名"); return; }
-            var found = allData.find(i => i.name === name);
-            if (found && found.mark === "v") alert(name + " 已完成填報！");
-            else alert(name + " 尚未填報。");
-        }
-
-        function showAllStatus() {
-            var tbody = document.getElementById('statusTableBody');
-            tbody.innerHTML = "";
-            allData.forEach(item => {
-                var tr = document.createElement('tr');
-                tr.innerHTML = `<td>${item.name}</td><td>${item.mark === 'v' ? '✔' : ''}</td>`;
-                tbody.appendChild(tr);
-            });
-            document.getElementById('allStatusContainer').classList.remove('hidden');
-        }
-    </script>
+    function showAllStatus() {
+        var tbody = document.getElementById('statusTableBody');
+        tbody.innerHTML = "";
+        allData.forEach(item => {
+            var tr = document.createElement('tr');
+            tr.innerHTML = `<td>${item.name}</td><td>${item.mark === 'v' ? '✔' : ''}</td>`;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('allStatusContainer').classList.remove('hidden');
+    }
+</script>
 </body>
 </html>
