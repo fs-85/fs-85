@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         window.onload = function() {
+            alert("【系統提示】\n為確保填報資料之正確性及安全性，本表單需驗證人員身分。\n請備妥您的「表單密碼」、「電腦帳號」及「案管系統帳號」進行登入。");
             var now = new Date();
             if (now > DEADLINE_DATE) {
                 showSection('closedSection');
