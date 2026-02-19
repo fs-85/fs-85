@@ -28,26 +28,8 @@
         .status-table th { background-color: #f2f2f2; }
         .scrollable-list { max-height: 300px; overflow-y: auto; margin-top: 10px; border: 1px solid #eee; }
         .hint { color: #666; font-size: 0.85em; text-align: center; line-height: 1.6; margin-bottom: 15px; }
-        #customAlert {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    z-index: 10000;
-    width: 80%;
-    max-width: 300px;
-    text-align: center;
-}
-#overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 9999;
-}
+        #customAlert { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.3); z-index: 10000; width: 80%; max-width: 300px; text-align: center; }
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; }
     </style>
 </head>
 <body>
@@ -136,17 +118,21 @@
         </div>
     </div>
 
-<div class="container hidden" id="thankYouSection">
-    <h2 style="color: #28a745;">提交成功！</h2>
-    <p style="text-align:center;">您選擇的時段已填報完成</p>
-    
-    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <button class="btn-secondary" style="background-color: #000; flex: 1;" onclick="addToAppleCalendar()">Apple 行事曆</button>
-        <button class="btn-secondary" style="background-color: #4285F4; flex: 1;" onclick="addToGoogleCalendar()">Google 行事曆</button>
-    </div>
+    <div class="container hidden" id="thankYouSection">
+        <h2 style="color: #28a745;">提交成功！</h2>
+        <p style="text-align:center;">您選擇的時段已填報完成</p>
+        
+        <p style="color: red; font-size: 0.85em; text-align: center; margin-bottom: 8px; font-weight: bold;">
+            ⚠️ LINE 使用者請改用 Safari/Chrome 開啟本頁<br>方可使用下方「加入行事曆」功能
+        </p>
 
-    <button class="btn-primary" onclick="location.reload()">回到首頁</button>
-</div>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="btn-secondary" style="background-color: #000; flex: 1; border-radius: 6px;" onclick="addToAppleCalendar()">Apple 行事曆</button>
+            <button class="btn-secondary" style="background-color: #4285F4; flex: 1; border-radius: 6px;" onclick="addToGoogleCalendar()">Google 行事曆</button>
+        </div>
+
+        <button class="btn-primary" onclick="location.reload()">回到首頁</button>
+    </div>
 
     <div id="loading" class="hidden">處理中，請稍候...</div>
 
@@ -154,24 +140,21 @@
     var scriptURL = "https://script.google.com/macros/s/AKfycbyoLsbsx_wu9SwWLDrkuByvgVGCde1_oplVOa7K9OZDltrlmwUNNtPBD7110eZa_wbL/exec";
     var allData = [];
     var userData = null;
+    var lastSelectedTime = "";
     var DEADLINE_DATE = new Date("2026-02-20T17:00:00");
 
-    // 1. 處理輸入過濾與鍵盤切換
     document.addEventListener('DOMContentLoaded', function() {
         const loginFields = ['passwordInput', 'adInput', 'caseInput'];
         ['adInput', 'caseInput'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
-                el.addEventListener('focus', function() {
-                    this.type = 'password'; 
-                });
+                el.addEventListener('focus', function() { this.type = 'password'; });
                 el.addEventListener('input', function() {
                     this.type = 'text'; 
                     this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
                 });
             }
         });
-
         const pwdEl = document.getElementById('passwordInput');
         if (pwdEl) {
             pwdEl.addEventListener('input', function() {
@@ -180,11 +163,44 @@
         }
     });
 
-    // 2. 收起鍵盤函式
-    function hideMobileKeyboard() {
-        if (document.activeElement) {
-            document.activeElement.blur();
+    window.onload = function() {
+        var ua = navigator.userAgent || navigator.vendor || window.opera;
+        var isLine = (ua.indexOf("Line") > -1);
+
+        var overlay = document.createElement('div');
+        overlay.id = 'overlay';
+        document.body.appendChild(overlay);
+
+        var alertBox = document.createElement('div');
+        alertBox.id = 'customAlert';
+        
+        var p = document.createElement('p');
+        p.style.cssText = "color: red; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; text-align: center;";
+        
+        if (isLine) {
+            p.innerHTML = "⚠️偵測到 LINE 瀏覽器⚠️<br>若需使用行事曆功能，請點擊右上角「...」並選擇使用 Safari 或 瀏覽器開啟。";
+        } else {
+            p.innerHTML = "⚠️系統提示⚠️<br>為確認為本人填報<br>請輸入驗證資訊";
         }
+        
+        alertBox.appendChild(p);
+        var btn = document.createElement('button');
+        btn.className = "btn-primary";
+        btn.innerText = "確定";
+        btn.onclick = function() { overlay.remove(); alertBox.remove(); };
+        alertBox.appendChild(btn);
+        document.body.appendChild(alertBox);
+
+        var now = new Date();
+        if (now > DEADLINE_DATE) {
+            showSection('closedSection');
+            if(overlay) overlay.remove();
+            if(alertBox) alertBox.remove();
+        }
+    };
+
+    function hideMobileKeyboard() {
+        if (document.activeElement) document.activeElement.blur();
         var field = document.createElement('input');
         field.setAttribute('type', 'text');
         field.setAttribute('style', 'position:absolute; top: 0px; opacity: 0;');
@@ -197,65 +213,22 @@
         }, 50);
     }
 
-    // 3. 頁面載入與提示視窗 (修正此處的括號錯誤)
-    window.onload = function() {
-        var overlay = document.createElement('div');
-        overlay.id = 'overlay';
-        document.body.appendChild(overlay);
-
-        var alertBox = document.createElement('div');
-        alertBox.id = 'customAlert';
-        
-        var p = document.createElement('p');
-        p.style.cssText = "color: red; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; text-align: center;";
-        p.innerHTML = "⚠️系統提示⚠️<br>為確認為本人填報<br>請輸入驗證資訊";
-        alertBox.appendChild(p);
-
-        var btn = document.createElement('button');
-        btn.className = "btn-primary";
-        btn.style.marginTop = "0";
-        btn.innerText = "確定";
-        
-        btn.onclick = function() {
-            overlay.remove();
-            alertBox.remove();
-        };
-        
-        alertBox.appendChild(btn);
-        document.body.appendChild(alertBox);
-
-        var now = new Date();
-        if (now > DEADLINE_DATE) {
-            showSection('closedSection');
-            if(overlay) overlay.remove();
-            if(alertBox) alertBox.remove();
-        }
-    }; // 這裡現在是正確的單一結束括號
-
-    // 4. 登入驗證邏輯
     function checkAuth() {
         hideMobileKeyboard();
-
         var pwd = document.getElementById('passwordInput').value;
         var ad = document.getElementById('adInput').value.trim();
         var caseId = document.getElementById('caseInput').value.trim();
 
         if (!pwd || !ad || !caseId) {
-            setTimeout(function() {
-                alert("請確實填寫所有欄位");
-            }, 100);
+            setTimeout(function() { alert("請確實填寫所有欄位"); }, 100);
             return;
         }
-
         if (pwd !== 'chy') {
-            setTimeout(function() {
-                alert("表單密碼錯誤");
-            }, 100);
+            setTimeout(function() { alert("表單密碼錯誤"); }, 100);
             return;
         }
 
         document.getElementById('loading').classList.remove('hidden');
-
         fetch(scriptURL + "?action=getList")
             .then(res => res.json())
             .then(data => {
@@ -264,16 +237,12 @@
                     item.ad.toLowerCase() === ad.toLowerCase() && 
                     String(item.caseId) === caseId
                 );
-
                 if (userData) {
                     setupForm();
                     if (userData.mark === "v") {
                         setTimeout(function(){
                             var confirmRevisit = confirm("系統偵測到您已完成填報\n是否要修改您的資料？");
-                            if (!confirmRevisit) {
-                                location.reload();
-                                return;
-                            }
+                            if (!confirmRevisit) { location.reload(); return; }
                             showSection('formSection');
                         }, 200);
                     } else {
@@ -290,11 +259,9 @@
             });
     }
 
-    // 5. 其他功能函式
     function setupForm() {
         document.getElementById('autoName').value = userData.name;
         document.getElementById('autoInfo').value = userData.section + " / " + userData.title;
-        
         var qSelect = document.getElementById('queryNameSelect');
         qSelect.innerHTML = '<option value="" disabled selected>請選擇...</option>';
         allData.forEach(item => {
@@ -351,6 +318,53 @@
         });
     }
 
+    function formatTimeForGoogle(dateStr, isEnd) {
+        let parts = dateStr.split(' ');
+        let dateParts = parts[0].split('/');
+        let year = parseInt(dateParts[0]) + 1911;
+        let month = dateParts[1];
+        let day = dateParts[2];
+        let timeRange = parts[1].split('-');
+        let time = isEnd ? timeRange[1] : timeRange[0];
+        let [hh, mm] = time.split(':');
+        return `${year}${month}${day}T${hh}${mm}00`;
+    }
+
+    function addToGoogleCalendar() {
+        if (!lastSelectedTime) { alert("找不到填報時間"); return; }
+        const start = formatTimeForGoogle(lastSelectedTime, false);
+        const end = formatTimeForGoogle(lastSelectedTime, true);
+        const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent("書記官打字測驗")}&dates=${start}/${end}&details=${encodeURIComponent("請準時參加")}&location=${encodeURIComponent("彰化分署")}`;
+        window.open(url, '_blank');
+    }
+
+    function addToAppleCalendar() {
+        if (!lastSelectedTime) { alert("找不到填報時間"); return; }
+        const start = formatTimeForGoogle(lastSelectedTime, false);
+        const end = formatTimeForGoogle(lastSelectedTime, true);
+        const icsContent = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "BEGIN:VEVENT",
+            `DTSTART:${start}`,
+            `DTEND:${end}`,
+            "SUMMARY:書記官打字測驗",
+            "DESCRIPTION:請準時至指定地點參加測驗",
+            "LOCATION:彰化分署",
+            "END:VEVENT",
+            "END:VCALENDAR"
+        ].join("\r\n");
+
+        const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "測驗預約.ics");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     function showSection(id) {
         ['loginSection', 'closedSection', 'formSection', 'querySection', 'thankYouSection'].forEach(sec => {
             document.getElementById(sec).classList.add('hidden');
@@ -358,10 +372,7 @@
         document.getElementById(id).classList.remove('hidden');
     }
 
-    function toggleSection(id) { 
-        hideMobileKeyboard();
-        showSection(id); 
-    }
+    function toggleSection(id) { hideMobileKeyboard(); showSection(id); }
 
     function queryStatus() {
         var name = document.getElementById('queryNameSelect').value;
@@ -381,66 +392,6 @@
         });
         document.getElementById('allStatusContainer').classList.remove('hidden');
     }
-        var lastSelectedTime = "";
-
-function formatTimeForGoogle(dateStr, isEnd) {
-    let parts = dateStr.split(' ');
-    let dateParts = parts[0].split('/');
-    let year = parseInt(dateParts[0]) + 1911;
-    let month = dateParts[1];
-    let day = dateParts[2];
-    
-    let timeRange = parts[1].split('-');
-    let time = isEnd ? timeRange[1] : timeRange[0];
-    let [hh, mm] = time.split(':');
-    
-    return `${year}${month}${day}T${hh}${mm}00`;
-}
-
-function addToGoogleCalendar() {
-    if (!lastSelectedTime) { alert("找不到填報時間，請重新操作"); return; }
-    
-    const start = formatTimeForGoogle(lastSelectedTime, false);
-    const end = formatTimeForGoogle(lastSelectedTime, true);
-    const title = encodeURIComponent("書記官打字測驗");
-    const details = encodeURIComponent("請準時參加測驗");
-    const location = encodeURIComponent("彰化分署");
-    
-    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
-    
-    window.open(url, '_blank');
-}
-
-function addToAppleCalendar() {
-    if (!lastSelectedTime) { alert("找不到填報時間，請重新操作"); return; }
-
-    const start = formatTimeForGoogle(lastSelectedTime, false);
-    const end = formatTimeForGoogle(lastSelectedTime, true);
-
-    const icsContent = [
-        "BEGIN:VCALENDAR",
-        "VERSION:2.0",
-        "PRODID:-//彰化分署//打字測驗預約//TW",
-        "BEGIN:VEVENT",
-        `DTSTART:${start}`,
-        `DTEND:${end}`,
-        "SUMMARY:書記官打字測驗",
-        "DESCRIPTION:請準時至指定地點參加測驗",
-        "LOCATION:彰化分署",
-        "END:VEVENT",
-        "END:VCALENDAR"
-    ].join("\r\n");
-
-    const base64Ics = btoa(unescape(encodeURIComponent(icsContent)));
-    const calendarUrl = 'data:text/calendar;base64,' + base64Ics;
-
-    const link = document.createElement("a");
-    link.href = calendarUrl;
-    link.download = "event.ics";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-</script>
+    </script>
 </body>
 </html>
