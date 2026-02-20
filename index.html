@@ -35,7 +35,7 @@
 <body>
 
     <div class="container" id="loginSection">
-        <h2>115上半年<br>書記官打字測驗預約表單</h2>
+        <h2>彰化分署115上半年<br>書記官打字測驗預約表單</h2>
         <div class="form-group">
             <label>1. 表單密碼</label>
             <input type="password" id="passwordInput" placeholder="請輸入表單密碼" autocomplete="off">
@@ -63,7 +63,7 @@
 
     <div class="container hidden" id="formSection">
         <button class="btn-info" onclick="toggleSection('querySection')">🔍 查詢填報狀態</button>
-        <h2>115上半年<br>書記官打字測驗預約表單</h2>
+        <h2>彰化分署115上半年<br>書記官打字測驗預約表單</h2>
         <div class="hint">
             請確認您的資訊並選擇測驗時段<br>
             若需修改，請重新進入表單填寫再次提交資料
@@ -370,7 +370,7 @@
         if (!lastSelectedTime) { alert("找不到填報時間"); return; }
         const start = formatTimeForGoogle(lastSelectedTime, false);
         const end = formatTimeForGoogle(lastSelectedTime, true);
-        const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent("書記官打字測驗")}&dates=${start}/${end}&details=${encodeURIComponent("請準時參加")}&location=${encodeURIComponent("彰化分署")}`;
+        const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent("書記官打字測驗")}&dates=${start}/${end}&details=${encodeURIComponent("請準時參加測驗")}&location=${encodeURIComponent("小會議室")}`;
         window.open(url, '_blank');
     }
 
