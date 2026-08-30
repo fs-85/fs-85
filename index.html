@@ -265,68 +265,125 @@
         }, 50);
     }
 
-    function checkAuth() {
-        hideMobileKeyboard();
-        var pwd = document.getElementById('passwordInput').value;
-        var ad = document.getElementById('adInput').value.trim();
-        var caseId = document.getElementById('caseInput').value.trim();
+function checkAuth() {
+    hideMobileKeyboard();
 
-        if (!pwd || !ad || !caseId) {
-            setTimeout(function() { alert("請確實填寫所有欄位"); }, 100);
-            return;
-        }
-        if (pwd !== 'chy') {
-            setTimeout(function() { alert("表單密碼錯誤"); }, 100);
-            return;
-        }
+    var pwd = document.getElementById('passwordInput').value;
+    var ad = document.getElementById('adInput').value.trim();
+    var caseId = document.getElementById('caseInput').value.trim();
 
-        document.getElementById('loading').classList.remove('hidden');
-        fetch(scriptURL + "?action=getList&t=" + Date.now(), {
-            cache: "no-store"
-        })
-        .then(async res => {
-            const text = await res.text();
-
-            console.log("Apps Script 回傳：", text);
-
-            if (!res.ok) {
-                throw new Error("HTTP " + res.status + "：" + text);
-            }
-
-            try {
-                return JSON.parse(text);
-            } catch (e) {
-                throw new Error("Apps Script 回傳的不是 JSON：" + text.substring(0, 300));
-            }
-        })
-        .then(data => {
-            allData = data;
-                userData = data.find(item => 
-                    item.ad.toLowerCase() === ad.toLowerCase() && 
-                    String(item.caseId) === caseId
-                );
-                if (userData) {
-                    setupForm();
-                    if (userData.mark === "v") {
-                        setTimeout(function(){
-                            var confirmRevisit = confirm("系統偵測到您已完成填報\n是否要修改您的資料？");
-                            if (!confirmRevisit) { location.reload(); return; }
-                            showSection('formSection');
-                        }, 200);
-                    } else {
-                        showSection('formSection');
-                    } 
-                } else {
-                    document.getElementById('loginMsg').innerText = "電腦帳號或案管系統帳號錯誤";
-                }
-                document.getElementById('loading').classList.add('hidden');
-            })
-            .catch(err => {
-                console.error("資料載入錯誤：", err);
-                alert("資料載入失敗：\n" + err.message);
-                document.getElementById('loading').classList.add('hidden');
-            });
+    if (!pwd || !ad || !caseId) {
+        setTimeout(function() {
+            alert("請確實填寫所有欄位");
+        }, 100);
+        return;
     }
+
+    if (pwd !== 'chy') {
+        setTimeout(function() {
+            alert("表單密碼錯誤");
+        }, 100);
+        return;
+    }
+
+    document.getElementById('loading').classList.remove('hidden');
+
+    fetch(scriptURL + "?action=getList&t=" + Date.now(), {
+        cache: "no-store"
+    })
+    .then(async res => {
+
+        const text = await res.text();
+
+        console.log("Apps Script 回傳：", text);
+
+        if (!res.ok) {
+            throw new Error("HTTP " + res.status + "：" + text);
+        }
+
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            throw new Error(
+                "Apps Script 回傳的不是 JSON：" +
+                text.substring(0, 300)
+            );
+        }
+
+    })
+    .then(result => {
+
+        if (!result.success) {
+            throw new Error(
+                result.error || "Apps Script 發生未知錯誤"
+            );
+        }
+
+        var data = result.data;
+
+        if (!Array.isArray(data)) {
+            throw new Error(
+                "Apps Script 回傳資料格式錯誤"
+            );
+        }
+
+        allData = data;
+
+        userData = data.find(item =>
+            String(item.ad || "").toLowerCase() === ad.toLowerCase() &&
+            String(item.caseId || "") === caseId
+        );
+
+        if (userData) {
+
+            setupForm();
+
+            if (userData.mark === "v") {
+
+                setTimeout(function() {
+
+                    var confirmRevisit = confirm(
+                        "系統偵測到您已完成填報\n是否要修改您的資料？"
+                    );
+
+                    if (!confirmRevisit) {
+                        location.reload();
+                        return;
+                    }
+
+                    showSection('formSection');
+
+                }, 200);
+
+            } else {
+
+                showSection('formSection');
+
+            }
+
+        } else {
+
+            document.getElementById('loginMsg').innerText =
+                "電腦帳號或案管系統帳號錯誤";
+
+        }
+
+        document.getElementById('loading').classList.add('hidden');
+
+    })
+    .catch(err => {
+
+        console.error("資料載入錯誤：", err);
+
+        alert(
+            "資料載入失敗：\n" +
+            err.message
+        );
+
+        document.getElementById('loading').classList.add('hidden');
+
+    });
+}
 
     function setupForm() {
         document.getElementById('autoName').value = userData.name;
