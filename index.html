@@ -281,10 +281,26 @@
         }
 
         document.getElementById('loading').classList.remove('hidden');
-        fetch(scriptURL + "?action=getList")
-            .then(res => res.json())
-            .then(data => {
-                allData = data;
+        fetch(scriptURL + "?action=getList&t=" + Date.now(), {
+            cache: "no-store"
+        })
+        .then(async res => {
+            const text = await res.text();
+
+            console.log("Apps Script 回傳：", text);
+
+            if (!res.ok) {
+                throw new Error("HTTP " + res.status + "：" + text);
+            }
+
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                throw new Error("Apps Script 回傳的不是 JSON：" + text.substring(0, 300));
+            }
+        })
+        .then(data => {
+            allData = data;
                 userData = data.find(item => 
                     item.ad.toLowerCase() === ad.toLowerCase() && 
                     String(item.caseId) === caseId
@@ -306,7 +322,8 @@
                 document.getElementById('loading').classList.add('hidden');
             })
             .catch(err => {
-                alert("資料載入失敗，請聯絡資訊工程師#3216");
+                console.error("資料載入錯誤：", err);
+                alert("資料載入失敗：\n" + err.message);
                 document.getElementById('loading').classList.add('hidden');
             });
     }
